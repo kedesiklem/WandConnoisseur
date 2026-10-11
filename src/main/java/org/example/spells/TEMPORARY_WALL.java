@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_TEMPORARY_WALL;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class TEMPORARY_WALL extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "temporary_wall.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Summon Wall";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "wall"};
-        this.imageFile = "temporary_wall.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Summons a shortlived obstacle";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_TEMPORARY_WALL();
         this.spawnProbabilities = new SpawnProbabilities(0.1, 0.1, 0.3, 0, 0.4, 0.2, 0, 0, 0, 0, 0);
         this.price = 100;

@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_FLOATING_ARC;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class FLOATING_ARC extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "floating_arc.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Floating arc";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "floating_arc.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile float above the ground";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_FLOATING_ARC()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.4, 0, 0.4, 0, 0.5, 0, 0, 0, 0, 0);
         this.price = 30;

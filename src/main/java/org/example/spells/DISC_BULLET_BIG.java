@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_DISC_BULLET_BIG;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class DISC_BULLET_BIG extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "disc_bullet_big.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Giga disc projectile";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "giga saw"};
-        this.imageFile = "disc_bullet_big.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Summons a large, serrated disc with a curious flight pattern";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_DISC_BULLET_BIG();
         this.spawnProbabilities = new SpawnProbabilities(0.6, 0, 0.7, 0, 0.8, 0, 0, 0, 0, 0, 0);
         this.price = 180;

@@ -1,18 +1,22 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 import org.example.main.VelocityComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_ROCKET_TIER_3 extends ProjectileBase{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "rocket_tier_3.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_ROCKET_TIER_3(){
         this.name = "Giant Magic Missile";
-        this.imageFile = "rocket_tier_3.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.velocityComponent = (this.velocityComponent == null ? new VelocityComponent() : this.velocityComponent)
             .setGravityY(50.0)

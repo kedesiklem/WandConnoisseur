@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_BLOOD_SPARKS;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BLOOD_MAGIC extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "blood_magic.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Blood magic";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "blood_magic.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Reduces a spell's mana cost and recharge time greatly, at the costs of four health points";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_BLOOD_SPARKS()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0.3, 0.7, 0, 0, 0, 0.5);
         this.price = 150;

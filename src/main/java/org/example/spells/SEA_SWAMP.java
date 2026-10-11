@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_SEA_SWAMP;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class SEA_SWAMP extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.material;
+    static final String staticImageFile = "sea_swamp.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Summon Swamp";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "sea of swamp", "swamp"};
-        this.imageFile = "sea_swamp.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Summons a large swamp below the caster";
-        this.type = SpellType.material;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_SEA_SWAMP();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         this.price = 350;

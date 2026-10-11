@@ -1,16 +1,20 @@
 package org.example.script;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class SCRIPT_COLOUR_RED extends Script{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "colour_red.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Red Glimmer";
-        this.imageFile = "colour_red.png";
+        this.image = staticImage;
         this.emote = staticEmote;
     }
 }

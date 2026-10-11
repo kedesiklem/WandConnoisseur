@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.projectiles.Projectile;
 import org.example.projectiles.PROJECTILE_SLOW_BULLET;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class SLOW_BULLET_TIMER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "slow_bullet_timer.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Energy Orb With A Timer";
-        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "energy orb timer"};
-        this.imageFile = "slow_bullet_timer.png";
+        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "energy orb timer", "orb timer"};
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A slow but powerful orb of energy that casts another spell after a timer runs out";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_SLOW_BULLET();
         this.triggerType = Projectile.TriggerType.timer;
         this.timerLength = 100;

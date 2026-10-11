@@ -1,16 +1,20 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.ProjectileComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_PROJECTILE_GRAVITY_FIELD extends ProjectileBaseField{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "projectile_gravity_field.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_PROJECTILE_GRAVITY_FIELD(){
         this.name = "Projectile gravity field";
-        this.imageFile = "projectile_gravity_field.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.projectileComponent = (this.projectileComponent == null ? new ProjectileComponent() : this.projectileComponent);
             // damage_game_effect_entities=""

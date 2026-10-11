@@ -35,10 +35,12 @@ record Edge(int x1, int y1, int x2, int y2){}
 record Vertex(int x, int y){}
 
 public class ImageBuilder{
-    private final int margin = 20;
+    private int margin = 20;
     private int canvasWidth = 1;
     private int canvasHeight = 1;
     private final Color backgroundColor;
+    private int borderThickness = 1;
+    private Color borderColor = null;
     private final Deque<PathAction> arrowStack = new ArrayDeque<>();
     private final LinkedList<DrawAction> drawActions = new LinkedList<>();
     private final Map<String, BufferedImage> imageIds = new HashMap<>();
@@ -50,11 +52,49 @@ public class ImageBuilder{
         this.backgroundColor = backgroundColor;
     }
 
+    // getters
+    public int getMargin(){
+        return this.margin;
+    }
+
+    public int getBorderThickness(){
+        return this.borderThickness;
+    }
+
+    public int getCanvasWidth(){
+        return this.canvasWidth;
+    }
+
+    public int getCanvasHeight(){
+        return this.canvasHeight;
+    }
+
+    // setters
+    public void setMargin(int margin){
+        this.margin = margin;
+    }
+
+    public void setBorderThickness(int borderThickness){
+        this.borderThickness = borderThickness;
+    }
+
+    public void setBorderColor(Color borderColor){
+        this.borderColor = borderColor;
+    }
+
+    public void setCanvasWidth(int canvasWidth){
+        this.canvasWidth = Math.max(this.canvasWidth, canvasWidth);
+    }
+
+    public void setCanvasHeight(int canvasHeight){
+        this.canvasHeight = Math.max(this.canvasHeight, canvasHeight);
+    }
+
     public void addImage(BufferedImage image, int x, int y, String id){
         this.canvasWidth = Math.max(this.canvasWidth, x + image.getWidth());
         this.canvasHeight = Math.max(this.canvasHeight, y + image.getHeight());
         this.imageIds.putIfAbsent(id, image);
-        this.drawActions.add(new ImageAction(id, x + this.margin, y + this.margin));
+        this.drawActions.add(new ImageAction(id, x, y));
     }
 
     private Path2D drawArrowhead(int x, int y, boolean invertX, boolean invertY){
@@ -72,9 +112,9 @@ public class ImageBuilder{
         }
 
         Path2D arrowhead = new Path2D.Double();
-        arrowhead.moveTo(x + this.margin, y + this.margin);
-        arrowhead.lineTo(x1 + this.margin + (invertY ? 0 : 0.1), y1 + this.margin);
-        arrowhead.lineTo(x2 + this.margin, y2 + this.margin);
+        arrowhead.moveTo(x, y);
+        arrowhead.lineTo(x1 + (invertY ? 0 : 0.1), y1);
+        arrowhead.lineTo(x2, y2);
         arrowhead.closePath();
 
         return arrowhead;
@@ -91,15 +131,15 @@ public class ImageBuilder{
         int middleHeight = (y2 + y1)/2;
         int radius = Math.max(Math.min(Math.abs(y2 - y1)/2, Math.abs((x2 - x1)/2)), 0);
         int[][] points = new int[][]{
-            {(priorityX ? middleWidth : x1) + (invertX == priorityX ? 0 : -2*radius) + this.margin, (priorityX ? y1 : middleHeight) + (invertY == priorityX ? -2*radius : 0) + this.margin, priorityX ? (invertY ? 270 : 90) : (invertX ? 0 : 180), (invertX ^ invertY) ^ !priorityX ? 90 : -90},
-            {(priorityX ? middleWidth : x2) + (invertX == priorityX ? -2*radius : 0) + this.margin, (priorityX ? y2 : middleHeight) + (invertY == priorityX ? 0 : -2*radius) + this.margin, priorityX ? (invertX ? 0 : 180) : (invertY ? 270 : 90), (invertX ^ invertY) ^ !priorityX ? -90 : 90}
+            {(priorityX ? middleWidth : x1) + (invertX == priorityX ? 0 : -2*radius), (priorityX ? y1 : middleHeight) + (invertY == priorityX ? -2*radius : 0), priorityX ? (invertY ? 270 : 90) : (invertX ? 0 : 180), (invertX ^ invertY) ^ !priorityX ? 90 : -90},
+            {(priorityX ? middleWidth : x2) + (invertX == priorityX ? -2*radius : 0), (priorityX ? y2 : middleHeight) + (invertY == priorityX ? 0 : -2*radius), priorityX ? (invertX ? 0 : 180) : (invertY ? 270 : 90), (invertX ^ invertY) ^ !priorityX ? -90 : 90}
         };
 
-        path.moveTo(x1 + this.margin, y1 + this.margin);
+        path.moveTo(x1, y1);
         for(int[] point : points){
             path.append(new Arc2D.Double(point[0], point[1], 2*radius, 2*radius, point[2], point[3], Arc2D.OPEN), true);
         }
-        path.lineTo(x2 + this.margin, y2 + this.margin);
+        path.lineTo(x2, y2);
 
         this.drawActions.add(new PathAction(this.drawArrowhead(x2, y2, priorityX ? invertX : invertY, priorityX), color, true));
         if(drawUnder){
@@ -118,14 +158,14 @@ public class ImageBuilder{
         boolean invertY = y1 > y2;
         int radius = Math.max(Math.min(Math.abs(y2 - y1)/2, Math.abs((x2 - x1)/2)), 0);
         int[][] points = new int[][]{
-            {(priorityX ? x2 : x1) + (invertX == priorityX ? 0 : -2*radius) + this.margin, (priorityX ? y1 : y2) + (invertY == priorityX ? -2*radius : 0) + this.margin, priorityX ? (invertY ? 270 : 90) : (invertX ? 0 : 180), (invertX ^ invertY) ^ !priorityX ? 90 : -90}
+            {(priorityX ? x2 : x1) + (invertX == priorityX ? 0 : -2*radius), (priorityX ? y1 : y2) + (invertY == priorityX ? -2*radius : 0), priorityX ? (invertY ? 270 : 90) : (invertX ? 0 : 180), (invertX ^ invertY) ^ !priorityX ? 90 : -90}
         };
 
-        path.moveTo(x1 + this.margin, y1 + this.margin);
+        path.moveTo(x1, y1);
         for(int[] point : points){
             path.append(new Arc2D.Double(point[0], point[1], 2*radius, 2*radius, point[2], point[3], Arc2D.OPEN), true);
         }
-        path.lineTo(x2 + this.margin, y2 + this.margin);
+        path.lineTo(x2, y2);
 
         this.drawActions.add(new PathAction(this.drawArrowhead(x2, y2, priorityX ? invertY : invertX, !priorityX), color, true));
         if(drawUnder){
@@ -135,14 +175,11 @@ public class ImageBuilder{
         }
     }
 
-    public void drawCurlyBrackets(int x1, int y1, int x2, int y2, int nb, Color color){
-        this.canvasWidth = Math.max(this.canvasWidth, Math.max(x1, x2));
-        this.canvasHeight = Math.max(this.canvasHeight, Math.max(y1, y2));
-
+    public Point drawCurlyBrackets(int x1, int y1, int x2, int y2, String text, Color color, boolean invertX, boolean invertY){
+        int textWidth = this.currentFontMetrics.stringWidth(text);
         int textHeight = this.currentFontMetrics.getHeight();
         Path2D path = new Path2D.Double();
         int tmp;
-
         if(y1 > y2){
             tmp = y1;
             y1 = y2;
@@ -154,34 +191,33 @@ public class ImageBuilder{
             x2 = tmp;
         }
 
-        if(y2 - y1 >= textHeight){
-            y2 -= textHeight;
-        }else{
-            y2 = y1;
-        }
+        this.canvasWidth = Math.max(this.canvasWidth, x2);
+        this.canvasHeight = Math.max(this.canvasHeight, y2);
 
-        int middleWidth = (x2 + x1)/2;
-        int middleHeight = (y2 + y1)/2;
-        int radius = Math.max(Math.min((y2 - y1)/2, (x2 - x1)/4), 0);
+        int middleWidth = (x1 + x2)/2;
+        int middleHeight = (y1 + y2)/2;
+        int radius = Math.max(Math.min((y2 - y1)/(invertY ? 4 : 2), (x2 - x1)/(invertY ? 2 : 4)), 0);
         int[][] points = new int[][]{
-            {x1 + this.margin, middleHeight - 2*radius + this.margin, 180, 90},
-            {middleWidth - 2*radius + this.margin, middleHeight + this.margin, 90, -90}
+            {invertY ? (middleWidth + (invertX ? 0 : -2*radius)) : x1, invertY ? y1 : (middleHeight + (invertX ? 0 : -2*radius)), invertY ? 90 : 180, invertX ^ invertY ? -90 : 90},
+            {middleWidth + (invertX || !invertY ? -2*radius : 0), middleHeight + (invertX || invertY ? -2*radius : 0), invertX ? (invertY ? 0 : 270) : (invertY ? 180 : 90), invertX ^ invertY ? 90 : -90}
         };
 
-        path.moveTo(x1 + this.margin, y1 + this.margin);
+        path.moveTo(invertY && invertX ? x2 : x1, invertY || !invertX ? y1 : y2);
         for(int[] point : points){
             path.append(new Arc2D.Double(point[0], point[1], 2*radius, 2*radius, point[2], point[3], Arc2D.OPEN), true);
         }
-        path.lineTo(middleWidth + this.margin, y2 + this.margin);
+        path.lineTo(invertY ? (invertX ? x1 : x2) : middleWidth, invertY ? middleHeight : (invertX ? y1 : y2));
 
         AffineTransform transform = new AffineTransform();
-        transform.translate(path.getCurrentPoint().getX(), 0);
-        transform.scale(-1, 1);
-        transform.translate(-path.getCurrentPoint().getX(), 0);
+        transform.translate(invertY ? 0 : path.getCurrentPoint().getX(), invertY ? path.getCurrentPoint().getY() : 0);
+        transform.scale(invertY ? 1 : -1, invertY ? -1 : 1);
+        transform.translate(invertY ? 0 : -path.getCurrentPoint().getX(), invertY ? -path.getCurrentPoint().getY() : 0);
         path.append(path.createTransformedShape(transform), false);
 
         this.drawActions.add(new PathAction(path, color, false));
-        this.drawActions.add(new TextAction("x" + nb, this.currentFont, (x2 + x1)/2 - this.currentFontMetrics.stringWidth("x" + nb)/2 + this.margin, y2 + textHeight + this.margin, color));
+        this.drawText(text, invertY ? (invertX ? x1 - textWidth : x2) : (x1 + x2 - textWidth)/2, invertY ? (y1 + y2 - textHeight)/2 : (invertX ? y1 - textHeight : y2), color);
+
+        return new Point(x2 + (invertX || !invertY ? 0 : textWidth), y2 + (invertX || invertY ? 0 : textHeight));
     }
 
     public void setFont(Font font){
@@ -198,18 +234,40 @@ public class ImageBuilder{
 
         this.canvasWidth = Math.max(this.canvasWidth, x + textWidth);
         this.canvasHeight = Math.max(this.canvasHeight, y + textHeight);
-        this.drawActions.add(new TextAction(text, this.currentFont, x + this.margin, y + this.currentFontMetrics.getMaxAscent() + this.margin, color));
+        this.drawActions.add(new TextAction(text, this.currentFont, x, y + this.currentFontMetrics.getMaxAscent(), color));
 
         return new Point(x + textWidth, y + textHeight);
     }
 
-    public Point drawText(String[] text, int x, int y, int margin, Color color){
+    public Point drawText(String[] text, int x, int y, int insideMargin, int outsideMargin, Color color){
         int textHeight = this.currentFontMetrics.getHeight();
-        Point nextPoint = new Point(x + margin, y + margin);
+        Point nextPoint = new Point(x + outsideMargin, y + outsideMargin);
 
         for(String str : text){
-            nextPoint.x = Math.max(nextPoint.x, x + this.drawText(str, x + margin, nextPoint.y, color).x);
-            nextPoint.y += textHeight;
+            nextPoint.x = Math.max(nextPoint.x, this.drawText(str, x + outsideMargin, nextPoint.y, color).x);
+            nextPoint.y += textHeight + insideMargin;
+        }
+        nextPoint.x += outsideMargin;
+        nextPoint.y += outsideMargin;
+
+        this.canvasWidth = Math.max(this.canvasWidth, nextPoint.x);
+        this.canvasHeight = Math.max(this.canvasHeight, nextPoint.y);
+
+        return new Point(nextPoint.x, nextPoint.y);
+    }
+
+    public Point drawTextFixedSpacing(String[] text, int x, int y, int margin, int spacing, Color color){
+        Point nextPoint = new Point(x + margin, y + margin);
+
+        for(int i=0; i < text.length; i++){
+            if(i < text.length - 1){
+                nextPoint.x = Math.max(nextPoint.x, this.drawText(text[i], x + margin, nextPoint.y, color).x);
+                nextPoint.y += spacing;
+            }else{
+                Point point = this.drawText(text[i], x + margin, nextPoint.y, color);
+                nextPoint.x = Math.max(nextPoint.x, point.x);
+                nextPoint.y = Math.max(nextPoint.y, point.y);
+            }
         }
         nextPoint.x += margin;
         nextPoint.y += margin;
@@ -228,7 +286,7 @@ public class ImageBuilder{
 
         this.canvasWidth = Math.max(this.canvasWidth, xMax);
         this.canvasHeight = Math.max(this.canvasHeight, yMax);
-        this.drawActions.add(new RectAction(xMin + this.margin, yMin + this.margin, xMax + this.margin, yMax + this.margin, color, fill));
+        this.drawActions.add(new RectAction(xMin, yMin, xMax, yMax, color, fill));
     }
 
     public Point drawTextRectangle(String[] text, int x, int y, int rectangleMargin, Color fontColor, Color rectangleColor){
@@ -236,13 +294,13 @@ public class ImageBuilder{
         Point nextPoint = new Point(x + rectangleMargin, y + rectangleMargin);
 
         for(String str : text){
-            nextPoint.x = Math.max(nextPoint.x, x + this.drawText(str, x + rectangleMargin, nextPoint.y, fontColor).x);
+            nextPoint.x = Math.max(nextPoint.x, this.drawText(str, x + rectangleMargin, nextPoint.y, fontColor).x);
             nextPoint.y += textHeight;
         }
         nextPoint.x += rectangleMargin;
         nextPoint.y += rectangleMargin;
 
-        this.drawActions.add(new RectAction(x + this.margin, y + this.margin, nextPoint.x + this.margin, nextPoint.y + this.margin, rectangleColor, false));
+        this.drawActions.add(new RectAction(x, y, nextPoint.x, nextPoint.y, rectangleColor, false));
         this.canvasWidth = Math.max(this.canvasWidth, nextPoint.x);
         this.canvasHeight = Math.max(this.canvasHeight, nextPoint.y);
 
@@ -258,6 +316,7 @@ public class ImageBuilder{
 
         g2d.setColor(this.backgroundColor);
         g2d.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        g2d.translate(this.margin, this.margin);
 
         Iterator<PathAction> it = this.arrowStack.descendingIterator();
         while(it.hasNext()){
@@ -300,6 +359,13 @@ public class ImageBuilder{
                     g2d.drawString(action.text(), action.x(), action.y());
                 }
             }
+        }
+
+        if(this.borderColor != null && this.borderThickness > 0){
+            g2d.translate(-this.margin, -this.margin);
+            g2d.setStroke(new BasicStroke(this.borderThickness));
+            g2d.setColor(this.borderColor);
+            g2d.drawRect(this.borderThickness/2, this.borderThickness/2, this.canvasWidth + 2*this.margin - this.borderThickness, this.canvasHeight + 2*this.margin - this.borderThickness);
         }
 
         return canvas;
@@ -511,6 +577,7 @@ public class ImageBuilder{
         Document document;
         SVGGeneratorContext ctx;
         Element root;
+        Element marginTranslation;
         Element defs;
         Element currentGroup;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -533,6 +600,9 @@ public class ImageBuilder{
         Map<Integer, LinkedList<TextAction>> textMap = new HashMap<>();
         Map<Long, LinkedList<RectAction>> rectMap = new HashMap<>();
         Map<Long, LinkedList<PathAction>> pathMap = new HashMap<>();
+
+        marginTranslation = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "g");
+        marginTranslation.setAttribute("transform", "translate(" + this.margin + "," + this.margin + ")");
 
         defs = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "defs");
 
@@ -610,7 +680,7 @@ public class ImageBuilder{
             currentGroup.appendChild(use);
         }
         if(currentGroup.hasChildNodes()){
-            root.appendChild(currentGroup);
+            marginTranslation.appendChild(currentGroup);
         }
 
         currentGroup = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "g");
@@ -664,7 +734,7 @@ public class ImageBuilder{
             }
         }
         if(currentGroup.hasChildNodes()){
-            root.appendChild(currentGroup);
+            marginTranslation.appendChild(currentGroup);
         }
 
         currentGroup = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "g");
@@ -691,7 +761,7 @@ public class ImageBuilder{
             }
         }
         if(currentGroup.hasChildNodes()){
-            root.appendChild(currentGroup);
+            marginTranslation.appendChild(currentGroup);
         }
 
         currentGroup = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "g");
@@ -742,8 +812,28 @@ public class ImageBuilder{
             }
         }
         if(currentGroup.hasChildNodes()){
-            root.appendChild(currentGroup);
+            marginTranslation.appendChild(currentGroup);
         }
+
+        root.appendChild(marginTranslation);
+        if(this.borderColor != null && this.borderThickness > 0){
+            Element rect = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "rect");
+
+            rect.setAttribute("x", String.valueOf(this.borderThickness/2.0));
+            rect.setAttribute("y", String.valueOf(this.borderThickness/2.0));
+            rect.setAttribute("width", String.valueOf(this.canvasWidth + 2*this.margin - this.borderThickness));
+            rect.setAttribute("height", String.valueOf(this.canvasHeight + 2*this.margin - this.borderThickness));
+            rect.setAttribute("fill", "none");
+            rect.setAttribute("stroke", String.format("#%02x%02x%02x", this.borderColor.getRed(), this.borderColor.getGreen(), this.borderColor.getBlue()));
+            rect.setAttribute("stroke-width", String.valueOf(this.borderThickness));
+
+            if(this.borderColor.getAlpha() < 255){
+                rect.setAttribute("stroke-opacity", String.valueOf(this.borderColor.getAlpha()/255.0));
+            }
+
+            root.appendChild(rect);
+        }
+
 
         return document;
     }

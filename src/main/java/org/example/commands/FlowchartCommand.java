@@ -17,6 +17,10 @@ public class FlowchartCommand extends CommandLocal{
     private static final LocalizedText COMMAND_FLOWCHART_DESCRIPTION = Global.getLanguageManager().get("COMMAND_FLOWCHART_DESCRIPTION");
     private static final LocalizedText COMMAND_GENERAL_SPELLS = Global.getLanguageManager().get("COMMAND_GENERAL_SPELLS");
     private static final LocalizedText COMMAND_GENERAL_SPELLS_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_SPELLS_DESCRIPTION");
+    private static final LocalizedText COMMAND_GENERAL_ALWAYS_CAST = Global.getLanguageManager().get("COMMAND_GENERAL_ALWAYS_CAST");
+    private static final LocalizedText COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION");
+    private static final LocalizedText COMMAND_GENERAL_SHUFFLE = Global.getLanguageManager().get("COMMAND_GENERAL_SHUFFLE");
+    private static final LocalizedText COMMAND_GENERAL_SHUFFLE_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_SHUFFLE_DESCRIPTION");
     private static final LocalizedText COMMAND_GENERAL_DRAW = Global.getLanguageManager().get("COMMAND_GENERAL_DRAW");
     private static final LocalizedText COMMAND_GENERAL_DRAW_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_DRAW_DESCRIPTION");
     private static final LocalizedText COMMAND_GENERAL_CAST_DELAY = Global.getLanguageManager().get("COMMAND_GENERAL_CAST_DELAY");
@@ -36,6 +40,7 @@ public class FlowchartCommand extends CommandLocal{
     private static final LocalizedText COMMAND_FLOWCHART_TYPE = Global.getLanguageManager().get("COMMAND_FLOWCHART_TYPE");
     private static final LocalizedText COMMAND_FLOWCHART_TYPE_DESCRIPTION = Global.getLanguageManager().get("COMMAND_FLOWCHART_TYPE_DESCRIPTION");
     private static final LocalizedText ERROR_GENERATING_FILE = Global.getLanguageManager().get("ERROR_GENERATING_FILE");
+    private static final LocalizedText ERROR_GENERATING_IMAGE = Global.getLanguageManager().get("ERROR_GENERATING_IMAGE");
     private static final LocalizedText ERROR_INVALID_TYPE = Global.getLanguageManager().get("ERROR_INVALID_TYPE");
 
     public FlowchartCommand(){
@@ -43,6 +48,8 @@ public class FlowchartCommand extends CommandLocal{
         this.description = COMMAND_FLOWCHART_DESCRIPTION;
         this.commandOptions = new CommandOption[]{
             new CommandOption(OptionType.STRING, COMMAND_GENERAL_SPELLS, COMMAND_GENERAL_SPELLS_DESCRIPTION, false, true),
+            new CommandOption(OptionType.STRING, COMMAND_GENERAL_ALWAYS_CAST, COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION, false, true),
+            new CommandOption(OptionType.BOOLEAN, COMMAND_GENERAL_SHUFFLE, COMMAND_GENERAL_SHUFFLE_DESCRIPTION, false, false),
             new CommandOption(OptionType.INTEGER, COMMAND_GENERAL_DRAW, COMMAND_GENERAL_DRAW_DESCRIPTION, false, false),
             new CommandOption(OptionType.STRING, COMMAND_GENERAL_CAST_DELAY, COMMAND_GENERAL_CAST_DELAY_DESCRIPTION, false, true),
             new CommandOption(OptionType.STRING, COMMAND_GENERAL_RECHARGE_TIME, COMMAND_GENERAL_RECHARGE_TIME_DESCRIPTION, false, true),
@@ -50,7 +57,7 @@ public class FlowchartCommand extends CommandLocal{
             new CommandOption(OptionType.INTEGER, COMMAND_GENERAL_MANA_REGEN, COMMAND_GENERAL_MANA_REGEN_DESCRIPTION, false, false),
             new CommandOption(OptionType.NUMBER, COMMAND_GENERAL_SPREAD, COMMAND_GENERAL_SPREAD_DESCRIPTION, false, false),
             new CommandOption(OptionType.NUMBER, COMMAND_GENERAL_SPEED, COMMAND_GENERAL_SPEED_DESCRIPTION, false, false),
-            new CommandOption(OptionType.STRING, COMMAND_FLOWCHART_TYPE, COMMAND_FLOWCHART_TYPE_DESCRIPTION, false, true),
+            new CommandOption(OptionType.STRING, COMMAND_FLOWCHART_TYPE, COMMAND_FLOWCHART_TYPE_DESCRIPTION, false, false, new String[]{"png", "svg", "svg_light", "text", "text_file"}),
             new CommandOption(OptionType.ATTACHMENT, COMMAND_GENERAL_FILE, COMMAND_GENERAL_FILE_DESCRIPTION, false, false)
         };
     }
@@ -75,13 +82,14 @@ public class FlowchartCommand extends CommandLocal{
         }
 
         Wand wand = Global.slashInteractionToWand(event);
-        String[] statOptions = new String[]{"draw", "cast_delay", "recharge_time", "mana_max", "mana_regen", "spread", "speed", "file"};
+        String[] statOptions = new String[]{"always_cast", "cast_delay", "recharge_time", "mana_max", "mana_regen", "spread", "speed", "file"};
         boolean statChanged = false;
         boolean eventReplied = false;
 
         if(wand == null){
             return;
         }
+        wand.saveFlowchartImage(Global.getPathOutput() + "fl.png", true);
         for(String statOption : statOptions){
             if(event.getOption(statOption) != null){
                 statChanged = true;
@@ -92,39 +100,29 @@ public class FlowchartCommand extends CommandLocal{
         event.deferReply(false).queue();
 
         if(type <= 2){
-            FileUpload wandStatImage = null;
-            FileUpload wandImage;
-            FileUpload flowchartImage;
-
-            if(statChanged){
-                wandStatImage = Global.JPanelToUpload(wand.getStatJPanel(), "wandstats.png");
-            }
-            wandImage = Global.JPanelToUpload(wand.getWandJPanel(), "wand.png");
-            flowchartImage = switch(type){
+            FileUpload spellsImage = Global.bufferedImageToUpload(statChanged ? wand.getStatImage().toPNG() : wand.getSpellsImage().toPNG(), "wand.png");
+            FileUpload flowchartImage = switch(type){
                 case 0 -> Global.bufferedImageToUpload(wand.getFlowchartImage(true), "flowchart.png");
                 case 1 -> Global.byteToUpload(wand.getFlowchartImageSVG(true, true), "flowchart.svg");
                 case 2 -> Global.byteToUpload(wand.getFlowchartImageSVG(true, false), "flowchart.svg");
                 default -> null;
             };
 
-            if(wandStatImage != null){
-                event.getHook().editOriginal("").setFiles(wandStatImage).queue();
+            if(spellsImage != null){
+                event.getHook().editOriginal("").setFiles(spellsImage).queue();
                 eventReplied = true;
             }
-
-            if(wandImage != null){
+            if(flowchartImage != null){
                 if(eventReplied){
-                    event.getChannel().sendFiles(wandImage).queue();
+                    event.getChannel().sendFiles(flowchartImage).queue();
                 }else{
-                    event.getHook().editOriginal("").setFiles(wandImage).queue();
+                    event.getHook().editOriginal("").setFiles(flowchartImage).queue();
+                    eventReplied = true;
                 }
-                eventReplied = true;
             }
 
-            if(eventReplied){
-                event.getChannel().sendFiles(flowchartImage).queue();
-            }else{
-                event.getHook().editOriginal("").setFiles(flowchartImage).queue();
+            if(!eventReplied){
+                event.getHook().editOriginal(ERROR_GENERATING_IMAGE.get(event)).queue();
             }
         }else{
             StringBuilder result = new StringBuilder();

@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_TEMPORARY_PLATFORM;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class TEMPORARY_PLATFORM extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "temporary_platform.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Summon Platform";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "platform"};
-        this.imageFile = "temporary_platform.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Summons a shortlived bit of ground";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_TEMPORARY_PLATFORM();
         this.spawnProbabilities = new SpawnProbabilities(0.1, 0.1, 0.3, 0, 0.4, 0.2, 0, 0, 0, 0, 0);
         this.price = 90;

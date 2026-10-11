@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_ORBIT_DISCS;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class ORBIT_DISCS extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "orbit_discs.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Sawblade Orbit";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "saw orbit"};
-        this.imageFile = "orbit_discs.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes four sawblades rotate around a projectile";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_ORBIT_DISCS()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.3, 0.65, 0, 0.4, 0.3, 0, 0, 0, 0, 0);
         this.price = 200;

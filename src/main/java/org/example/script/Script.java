@@ -9,12 +9,14 @@ import java.lang.invoke.MethodHandles;
 import javax.imageio.ImageIO;
 
 public abstract class Script{
+    protected boolean modded = false;
     protected String name = "script_name";
     protected static final String imagePath = "./src/main/java/org/example/image/spell/";
-    protected String imageFile = "_unidentified.png";
-    protected static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    protected static final String staticImageFile = "_unidentified.png";
+    protected static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
+    protected BufferedImage image = staticImage;
+    protected static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
     protected String emote = staticEmote;
-    protected BufferedImage image = null;
 
     public Script(){
         this.initialization();
@@ -34,12 +36,16 @@ public abstract class Script{
             return null;
         }
 
-        newScript.imageFile = this.imageFile;
+        newScript.image = this.image;
         newScript.name = this.name;
         newScript.emote = this.emote;
-        newScript.image = Global.cloneBufferedImage(this.image); // clone
 
         return newScript;
+    }
+
+    // getters
+    public boolean getIsModded(){
+        return this.modded;
     }
 
     public String getEmote(){
@@ -47,9 +53,6 @@ public abstract class Script{
     }
 
     public BufferedImage getImage(){
-        if(this.image == null){
-            this.image = Global.loadImage(imagePath + this.imageFile);
-        }
         return this.image;
     }
 

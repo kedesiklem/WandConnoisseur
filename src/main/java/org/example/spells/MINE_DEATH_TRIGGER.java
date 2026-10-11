@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.projectiles.Projectile;
 import org.example.projectiles.PROJECTILE_MINE;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class MINE_DEATH_TRIGGER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "mine_death_trigger.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Unstable crystal with trigger";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "unstable crystal trigger", "unstable crystal expiration"};
-        this.imageFile = "mine_death_trigger.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A crystal that explodes and casts another spell when someone comes nearby";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_MINE();
         this.triggerType = Projectile.TriggerType.expiration;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0);

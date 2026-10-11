@@ -1,15 +1,19 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_SEA_WATER extends Projectile{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "sea_water.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_SEA_WATER(){
         this.name = "Sea of water";
-        this.imageFile = "sea_water.png";
+        this.image = staticImage;
         this.emote = staticEmote;
     }
 }

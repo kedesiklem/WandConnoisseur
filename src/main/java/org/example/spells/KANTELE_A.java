@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_KANTELE_A;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class KANTELE_A extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "kantele_a.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Kantele - Note A";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "kantele a", "note"};
-        this.imageFile = "kantele_a.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Music for your ears!";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_KANTELE_A();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         this.price = 10;

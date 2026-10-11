@@ -3,19 +3,25 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 
 public class OMEGA extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "omega.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Omega";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "omega.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts copies of every spell in your wand";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0.1, 0.1, 0, 0, 0, 1);
         this.recursive = true;
         this.price = 600;
@@ -26,21 +32,27 @@ public class OMEGA extends Spell{
     @Override
     public void action(CardPool cardPool, CastState castState, int recursionLevel, int iterationLevel){
         Spell currentSpell;
+        List<Spell> currentPool;
 
-        for(int i=0; i < cardPool.getDiscardSize(); i++){
-            currentSpell = cardPool.getDiscardSpell(i);
+        currentPool = cardPool.getDiscardList();
+        for(int i=0; i < currentPool.size(); i++){
+            currentSpell = currentPool.get(i);
             if(currentSpell.getClass() != RESET.class){
                 copyDrawDisabled(cardPool, castState, currentSpell, recursionLevel);
             }
         }
-        for(int i=0; i < cardPool.getHandSize(); i++){
-            currentSpell = cardPool.getHandSpell(i);
+
+        currentPool = cardPool.getHandList();
+        for(int i=0; i < currentPool.size(); i++){
+            currentSpell = currentPool.get(i);
             if(!currentSpell.recursive){
                 copyDrawDisabled(cardPool, castState, currentSpell, recursionLevel);
             }
         }
-        for(int i=0; i < cardPool.getDeckSize(); i++){
-            currentSpell = cardPool.getDeckSpell(i);
+
+        currentPool = cardPool.getDeckList();
+        for(int i=0; i < currentPool.size(); i++){
+            currentSpell = currentPool.get(i);
             if(currentSpell.getClass() != RESET.class){
                 copyDrawDisabled(cardPool, castState, currentSpell, recursionLevel);
             }

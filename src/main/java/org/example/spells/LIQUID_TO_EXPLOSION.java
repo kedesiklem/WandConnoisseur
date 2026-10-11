@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_LIQUID_TO_EXPLOSION;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class LIQUID_TO_EXPLOSION extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "liquid_to_explosion.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Liquid Detonation";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "liquid_to_explosion.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Converts nearby nonmagical liquids into explosive gunpowder";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_LIQUID_TO_EXPLOSION()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.3, 0.3, 0.3, 0, 0, 0, 0, 0, 0);
         this.price = 120;

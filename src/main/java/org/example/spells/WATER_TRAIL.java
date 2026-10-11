@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_EFFECT_APPLY_WET;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class WATER_TRAIL extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "water_trail.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Water trail";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "water_trail.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Gives a projectile a trail of water";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_EFFECT_APPLY_WET()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.3, 0.3, 0.3, 0.3, 0, 0, 0, 0, 0, 0);
         this.price = 160;

@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_DEATH_CROSS_BIG;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class DEATH_CROSS_BIG extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "death_cross_big.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Giga Death Cross";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "death_cross_big.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A giant, deadly energy cross that explodes after a short time";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_DEATH_CROSS_BIG();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.4, 0.5, 0.55, 0.3, 0.4, 0, 0, 0, 0.2);
         this.price = 310;

@@ -10,8 +10,12 @@ import org.example.spells.*;
 import static org.example.WandConnoisseur.jda;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
+import java.awt.image.*;
 import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -44,10 +48,22 @@ public class Global{
     private static final LocalizedText ERROR_NOT_INTEGER = Global.getLanguageManager().get("ERROR_NOT_INTEGER");
     private static final LocalizedText ERROR_UNKNOWN_SPELL = Global.getLanguageManager().get("ERROR_UNKNOWN_SPELL");
     private static final LocalizedText ERROR_UNKNOWN_SPELLS = Global.getLanguageManager().get("ERROR_UNKNOWN_SPELLS");
+    private static final LocalizedText ERROR_NO_SPELL = Global.getLanguageManager().get("ERROR_NO_SPELL");
     private static final LocalizedText ERROR_MESSAGE_TOO_LONG = Global.getLanguageManager().get("ERROR_MESSAGE_TOO_LONG");
     private static final LocalizedText ERROR_READING_FILE = Global.getLanguageManager().get("ERROR_READING_FILE");
     private static final LocalizedText ERROR_XML_NO_WAND = Global.getLanguageManager().get("ERROR_XML_NO_WAND");
     private static final LocalizedText ERROR_WRONG_FILE_TYPE = Global.getLanguageManager().get("ERROR_WRONG_FILE_TYPE");
+    public enum MimeType{TEXT("text/plain"), CSV("text/csv"), HTML("text/html"), CSS("text/css"), JAVASCRIPT("text/javascript"), JSON("application/json"), XML("application/xml"), SVG("image/svg+xml"), PNG("image/png"), JPEG("image/jpeg"), GIF("image/gif"), WEBP("image/webp"), PDF("application/pdf"), ZIP("application/zip"), BINARY("application/octet-stream"), DEFAULT("application/octet-stream");
+        private final String value;
+
+        MimeType(String value){
+            this.value = value;
+        }
+
+        public String getValue(){
+            return value;
+        }
+    }
     public enum DamageType{PROJECTILE, MELEE, EXPLOSION, ELECTRICITY, FIRE, DRILL, SLICE, ICE, HEALING, PHYSICS_HIT, RADIOACTIVE, POISON, OVEREATING, CURSE, HOLY;
         public String getDisplayName(){
             String result = name().toLowerCase().replace('_', ' ');
@@ -75,21 +91,22 @@ public class Global{
     private static final SpellFilter spellFilter = new SpellFilter();
     private static final String[] spellProperties = SpellFilter.PROPERTY_RESOLVERS.keySet().stream().sorted().toArray(String[]::new);
     private static final String[] spellStringProperties = SpellFilter.STRING_PROPERTY_RESOLVERS.keySet().stream().sorted().toArray(String[]::new);
+    public static boolean modded = false;
     private static final ProjectileList projectileList = new ProjectileList();
     private static final ScriptList scriptList = new ScriptList();
-    private static final SpellList spellList = new SpellList();
-    private static final SpellList spellListNonRecursive = new SpellList(spell -> !spell.getRecursive());
-    private static final SpellList spellListProjectileType = new SpellList(spell -> spell.getType() == Spell.SpellType.projectile);
-    private static final SpellList spellListProjectileTypeNonRecursive = new SpellList(spell -> spell.getType() == Spell.SpellType.projectile && !spell.getRecursive());
-    private static final SpellList spellListRelatedProjectile = new SpellList(spell -> spell.getRelatedProjectile() != null);
-    private static final SpellList spellListRelatedProjectileNonRecursive = new SpellList(spell -> spell.getRelatedProjectile() != null && !spell.getRecursive());
-    private static final SpellList spellListProjectileComponent = new SpellList(spell -> spell.getRelatedProjectile() != null && spell.getRelatedProjectile().getProjectileComponent() != null);
-    private static final SpellList spellListProjectileComponentNonRecursive = new SpellList(spell -> spell.getRelatedProjectile() != null && spell.getRelatedProjectile().getProjectileComponent() != null && !spell.getRecursive());
-    private static final SpellList spellListModifier = new SpellList(spell -> spell.getType() == Spell.SpellType.modifier);
-    private static final SpellList spellListModifierNonRecursive = new SpellList(spell -> spell.getType() == Spell.SpellType.modifier && !spell.getRecursive());
-    private static final SpellList spellListStaticProjectile = new SpellList(spell -> spell.getType() == Spell.SpellType.static_projectile);
-    private static final SpellList spellListStaticProjectileNonRecursive = new SpellList(spell -> spell.getType() == Spell.SpellType.static_projectile && !spell.getRecursive());
-    private static final SpellList spellListLifetimeModifier = new SpellList(spell -> spell.getLifetime() != 0, Comparator.comparing(Spell::getLifetime).thenComparing(Spell::getName));
+    private static final SpellList spellList = new SpellList(spell -> modded || !spell.getIsModded());
+    private static final SpellList spellListNonRecursive = new SpellList(spell -> !spell.getRecursive() && (modded || !spell.getIsModded()));
+    private static final SpellList spellListProjectileType = new SpellList(spell -> spell.getType() == Spell.SpellType.projectile && (modded || !spell.getIsModded()));
+    private static final SpellList spellListProjectileTypeNonRecursive = new SpellList(spell -> spell.getType() == Spell.SpellType.projectile && !spell.getRecursive() && (modded || !spell.getIsModded()));
+    private static final SpellList spellListRelatedProjectile = new SpellList(spell -> spell.getRelatedProjectile() != null && (modded || !spell.getIsModded()));
+    private static final SpellList spellListRelatedProjectileNonRecursive = new SpellList(spell -> spell.getRelatedProjectile() != null && !spell.getRecursive() && (modded || !spell.getIsModded()));
+    private static final SpellList spellListProjectileComponent = new SpellList(spell -> spell.getRelatedProjectile() != null && spell.getRelatedProjectile().getProjectileComponent() != null && (modded || !spell.getIsModded()));
+    private static final SpellList spellListProjectileComponentNonRecursive = new SpellList(spell -> spell.getRelatedProjectile() != null && spell.getRelatedProjectile().getProjectileComponent() != null && !spell.getRecursive() && (modded || !spell.getIsModded()));
+    private static final SpellList spellListModifier = new SpellList(spell -> spell.getType() == Spell.SpellType.modifier && (modded || !spell.getIsModded()));
+    private static final SpellList spellListModifierNonRecursive = new SpellList(spell -> spell.getType() == Spell.SpellType.modifier && !spell.getRecursive() && (modded || !spell.getIsModded()));
+    private static final SpellList spellListStaticProjectile = new SpellList(spell -> spell.getType() == Spell.SpellType.static_projectile && (modded || !spell.getIsModded()));
+    private static final SpellList spellListStaticProjectileNonRecursive = new SpellList(spell -> spell.getType() == Spell.SpellType.static_projectile && !spell.getRecursive() && (modded || !spell.getIsModded()));
+    private static final SpellList spellListLifetimeModifier = new SpellList(spell -> spell.getLifetime() != 0 && (modded || !spell.getIsModded()), Comparator.comparing(Spell::getLifetime).thenComparing(Spell::getName));
     private static final String[] aliasList = spellList.getAllAlias();
     private static final String[] aliasListRelatedProjectile = spellListRelatedProjectile.getAllAlias();
     private static final String[] aliasListProjectileComponent = spellListProjectileComponent.getAllAlias();
@@ -99,13 +116,15 @@ public class Global{
     private static final WandList wandList = new WandList();
     private static final int baseImageSize = 16;
     private static final int baseIconSize = 7;
-    private static final int imageScaleFactor = 5;
-    private static final int margin = 4*getImageScaleFactor();
+    private static final int scaleFactor = 5;
+    private static final int margin = 4*scaleFactor;
     private static final Font titleFont = loadFont("./src/main/java/org/example/TitleFont.ttf");
     private static final Font pixelFont = loadFont("./src/main/java/org/example/PixelFont.ttf");
+    private static final Font pixelFontSmall = loadFont("./src/main/java/org/example/PixelFontSmall.ttf");
     private static final Font glyphFont = loadFont("./src/main/java/org/example/GlyphFont.ttf");
     private static final Pattern delayPattern = Pattern.compile("^ *([+-]?[0-9]+(|\\.[0-9]+)?)(?: *(|[fs]))? *$");
     private static final Pattern spellPattern = Pattern.compile("^(?:(inf|max|[0-9]+):)?([^:]*)(?::([0-9]+))?$");
+    private static final Pattern alwaysCastPattern = Pattern.compile("^([^:]*)(?::([0-9]+))?$");
     private static final Pattern wandSpritePattern = Pattern.compile("^wand_[0-9]{4}$");
     public static final MenuManager menuManager = new MenuManager();
     private static long currentFrame = 0;
@@ -302,8 +321,8 @@ public class Global{
         return baseIconSize;
     }
 
-    public static int getImageScaleFactor(){
-        return imageScaleFactor;
+    public static int getScaleFactor(){
+        return scaleFactor;
     }
 
     public static int getMargin(){
@@ -318,6 +337,10 @@ public class Global{
         return pixelFont;
     }
 
+    public static Font getPixelFontSmall(){
+        return pixelFontSmall;
+    }
+
     public static Font getGlyphFont(){
         return glyphFont;
     }
@@ -328,6 +351,10 @@ public class Global{
 
     public static Pattern getSpellPattern(){
         return spellPattern;
+    }
+
+    public static Pattern getAlwaysCastPattern(){
+        return alwaysCastPattern;
     }
 
     public static long getCurrentFrame(){
@@ -420,13 +447,25 @@ public class Global{
         return rotated;
     }
 
-    public static BufferedImage scaleImage(BufferedImage originalImage, int scaleFactor){
-        if(originalImage == null){
+    public static BufferedImage scaleImage(BufferedImage image, int scale){
+        if(image == null){
             return null;
         }
+        if(scale <= 1){
+            return image;
+        }
+
+        int type = image.getType();
+        return switch(type){
+            case 1, 2, 3, 4 -> scaleInt(image, scale, type);
+            case 6, 7 -> scale4BYTE(image, scale, type);
+            default -> scaleImageGeneric(image, scale);
+        };
+    }
+
+    private static BufferedImage scaleImageGeneric(BufferedImage originalImage, int scaleFactor){
         int newWidth = originalImage.getWidth()*scaleFactor;
         int newHeight = originalImage.getHeight()*scaleFactor;
-
         BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = scaledImage.createGraphics();
 
@@ -438,6 +477,101 @@ public class Global{
         g2d.dispose();
 
         return scaledImage;
+    }
+
+    private static BufferedImage scaleInt(BufferedImage image, int scale, int type){
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int scaledWidth = width*scale;
+        BufferedImage newImage = new BufferedImage(scaledWidth, height*scale, type);
+        int[] src = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        int[] dst = ((DataBufferInt) newImage.getRaster().getDataBuffer()).getData();
+        int[] expandedRow = new int[scaledWidth];
+
+        for(int y=0; y < height; y++){
+            int srcIndex = y*width;
+            int dstIndex = 0;
+
+            for(int x=0; x < width; x++){
+                int pixel = src[srcIndex + x];
+                for(int sx=0; sx < scale; sx++){
+                    expandedRow[dstIndex++] = pixel;
+                }
+            }
+
+            int dstRow = y*scale*scaledWidth;
+            for(int sy=0; sy < scale; sy++){
+                System.arraycopy(expandedRow, 0, dst, dstRow + sy*scaledWidth, scaledWidth);
+            }
+        }
+
+        return newImage;
+    }
+
+    public static BufferedImage scale4BYTE(BufferedImage src, int scale, int type){
+        final int w = src.getWidth();
+        final int h = src.getHeight();
+        final int dw = w*scale;
+        final int dh = h*scale;
+        final BufferedImage dst = new BufferedImage(dw, dh, type);
+        final byte[] s = ((java.awt.image.DataBufferByte) src.getRaster().getDataBuffer()).getData();
+        final byte[] d = ((java.awt.image.DataBufferByte) dst.getRaster().getDataBuffer()).getData();
+        final int srcStride = w << 2;
+        final int dstStride = dw << 2;
+
+        for(int y=0; y < h; y++){
+            final int sRow = y*srcStride;
+            final int dRow = y*scale*dstStride;
+
+            for (int sy=0; sy < scale; sy++){
+                int sp = sRow;
+                int dp = dRow + sy*dstStride;
+
+                for (int x = 0; x < w; x++){
+                    final byte a = s[sp++];
+                    final byte b = s[sp++];
+                    final byte g = s[sp++];
+                    final byte r = s[sp++];
+
+                    for (int sx = 0; sx < scale; sx++){
+                        d[dp++] = a;
+                        d[dp++] = b;
+                        d[dp++] = g;
+                        d[dp++] = r;
+                    }
+                }
+            }
+        }
+
+        return dst;
+    }
+
+    public static BufferedImage grayscaleImage(BufferedImage originalImage, boolean luminance){
+        if(originalImage == null){
+            return null;
+        }
+
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+        BufferedImage grayscaleImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for(int y = 0; y < height; y++){
+            for(int x = 0; x < width; x++){
+                int argb = originalImage.getRGB(x, y);
+
+                int alpha = (argb >> 24) & 0xFF;
+                int red = (argb >> 16) & 0xFF;
+                int green = (argb >> 8)  & 0xFF;
+                int blue = argb & 0xFF;
+
+                int gray = luminance ? (int)(0.299*red + 0.587*green + 0.114*blue) : (red + green + blue)/3;
+                int newArgb = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+
+                grayscaleImage.setRGB(x, y, newArgb);
+            }
+        }
+
+        return grayscaleImage;
     }
 
     public static BufferedImage loadImage(String path){
@@ -524,6 +658,8 @@ public class Global{
     public static Wand slashInteractionToWand(SlashCommandInteractionEvent event){
         SpellList spellList = Global.getSpellList();
         OptionMapping spellsOption = event.getOption("spells");
+        OptionMapping alwaysCastOption = event.getOption("always_cast");
+        OptionMapping shuffleOption = event.getOption("shuffle");
         OptionMapping drawOption = event.getOption("draw");
         OptionMapping castDelayOption = event.getOption("cast_delay");
         OptionMapping rechargeTimeOption = event.getOption("recharge_time");
@@ -535,6 +671,7 @@ public class Global{
         String spellsInput = "";
         StringBuilder unknownSpells = new StringBuilder();
         boolean severalUnknown = false;
+        boolean shuffle = false;
         int draw = 1;
         int castDelay = 0;
         int rechargeTime = 0;
@@ -615,6 +752,10 @@ public class Global{
                                         }
                                     }
                                     case "gun_config" -> {
+                                        currentString = statElement.getAttribute("shuffle_deck_when_empty");
+                                        if(!currentString.equals("")){
+                                            try{shuffle = Integer.parseInt(currentString) == 1;}catch(Exception ignored){}
+                                        }
                                         currentString = statElement.getAttribute("actions_per_round");
                                         if(!currentString.equals("")){
                                             try{draw = (int)Math.floor(Double.parseDouble(currentString));}catch(Exception ignored){}
@@ -627,8 +768,6 @@ public class Global{
                                         if(!currentString.equals("")){
                                             try{nb_slot = (int)Math.floor(Double.parseDouble(currentString));}catch(Exception ignored){}
                                         }
-
-                                        //System.out.println(indent + "    \033[0;31mshuffle_deck_when_empty\u001b[0;0m=\"" + statElement.getAttribute("shuffle_deck_when_empty") + "\"");
                                     }
                                 }
                             }
@@ -655,7 +794,6 @@ public class Global{
                                         currentSpell = spellList.getSpell(currentString);
                                         if(currentSpell == null){
                                             System.out.println("unknown spell: " + currentString);
-                                            break;
                                         }
                                     }
                                     case "ItemComponent" -> {
@@ -698,6 +836,9 @@ public class Global{
             }
         }
 
+        if(shuffleOption != null){
+            shuffle = shuffleOption.getAsBoolean();
+        }
         if(drawOption != null){
             draw = Math.max(drawOption.getAsInt(), 1);
         }
@@ -732,13 +873,17 @@ public class Global{
 
         if(spellsOption != null){
             spellsInput = spellsOption.getAsString();
-            spellsString = spellsInput.split(",");
+            spellsString = spellsInput.split(",", -1);
 
             for(int i=0; i < spellsString.length; i++){
                 spellsString[i] = spellsString[i].trim().toLowerCase();
             }
 
             for(String s : spellsString){
+                if(s.equals("")){
+                    spells.add(null);
+                    continue;
+                }
                 m = spellPattern.matcher(s);
                 if(m.find()){
                     currentSpell = spellList.getSpell(m.group(2));
@@ -772,6 +917,41 @@ public class Global{
             }
         }
 
+        if(alwaysCastOption != null){
+            spellsInput = alwaysCastOption.getAsString();
+            spellsString = spellsInput.split(",", -1);
+
+            for(int i=0; i < spellsString.length; i++){
+                spellsString[i] = spellsString[i].trim().toLowerCase();
+            }
+
+            for(String s : spellsString){
+                m = alwaysCastPattern.matcher(s);
+                if(m.find()){
+                    currentSpell = spellList.getSpell(m.group(1));
+                    currentSpellCount = (m.group(2) != null) ? Integer.parseInt(m.group(2)) : 1;
+                }else{
+                    currentSpell = null;
+                }
+                if(currentSpell != null){
+                    alwaysCasts.add(currentSpell);
+                    for(int j=1; j < currentSpellCount; j++){
+                        alwaysCasts.add(currentSpell.clone());
+                    }
+                }else{
+                    if(unknownSpells.isEmpty()){
+                        unknownSpells.append(s);
+                    }else{
+                        if(!severalUnknown){
+                            unknownSpells.insert(0, "\"").append("\"");
+                        }
+                        severalUnknown = true;
+                        unknownSpells.append(", \"").append(s).append("\"");
+                    }
+                }
+            }
+        }
+
         if(!unknownSpells.isEmpty()){
             if(severalUnknown){
                 event.reply(ERROR_UNKNOWN_SPELLS.get(event, unknownSpells.toString())).setEphemeral(true).queue();
@@ -781,10 +961,16 @@ public class Global{
             return null;
         }
 
-        wand = new Wand(draw, castDelay, rechargeTime, manaMax, manaRegen, spells.size(), spread, speed);
+        if(fileOption == null && spells.size() == 0){
+            event.reply(ERROR_NO_SPELL.get(event)).setEphemeral(true).queue();
+            return null;
+        }
+
+        wand = new Wand(shuffle, draw, castDelay, rechargeTime, manaMax, manaRegen, spells.size(), spread, speed);
         if(!sprite.equals("")){
             wand.setSprite(sprite);
         }
+        wand.setAlwaysCasts(alwaysCasts);
         wand.setSpells(spells.toArray(new Spell[0]));
 
         return wand;
@@ -835,11 +1021,11 @@ public class Global{
             InputStream myStream = new FileInputStream(filePath);
             return Font.createFont(Font.TRUETYPE_FONT, myStream);
         }catch(Exception e){
-            return new Font("Arial", Font.PLAIN, imageScaleFactor*7);
+            return new Font("Arial", Font.PLAIN, scaleFactor*7);
         }
     }
 
-    public static File JPanelToFile(JPanel jPanel, String filePath){
+    public static File jPanelToFile(JPanel jPanel, String filePath){
         if(jPanel == null || jPanel.getSize().width <= 0 || jPanel.getSize().height <= 0){
             return null;
         }
@@ -857,6 +1043,14 @@ public class Global{
         }
 
         return new File(filePath);
+    }
+
+    public static File bufferedImageToFile(BufferedImage image, String filePath){
+        if(saveBufferedImage(image, filePath)){
+            return new File(filePath);
+        }
+
+        return null;
     }
 
     public static byte[] bufferedImageToBytes(BufferedImage bufferedImage){
@@ -892,12 +1086,99 @@ public class Global{
         }
     }
 
-    public static FileUpload byteToUpload(byte[] data, String name) {
+    public static FileUpload byteToUpload(byte[] data, String name){
         try{
             return data != null ? FileUpload.fromData(data, name) : null;
         }catch(Exception e){
             return null;
         }
+    }
+
+    public static boolean saveByteFile(byte[] data, String path){
+        try{
+            Files.write(Path.of(path), data);
+        }catch(Exception e){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean saveBufferedImage(BufferedImage image, String path){
+        try{
+            ImageIO.write(image, "png", Path.of(path).toFile());
+        }catch(Exception e){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static void toClipboard(String text){
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+    }
+
+    public static void toClipboard(BufferedImage image){
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new Transferable(){
+            @Override
+            public DataFlavor[] getTransferDataFlavors(){
+                return new DataFlavor[]{DataFlavor.imageFlavor};
+            }
+
+            @Override
+            public boolean isDataFlavorSupported(DataFlavor flavor){
+                return DataFlavor.imageFlavor.equals(flavor);
+            }
+
+            @Override
+            public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException{
+                if(!isDataFlavorSupported(flavor)){
+                    throw new UnsupportedFlavorException(flavor);
+                }
+                return image;
+            }
+        }, null);
+    }
+
+    public static void toClipboard(byte[] bytes, MimeType mimeType){
+        if(mimeType == null){
+            mimeType = MimeType.DEFAULT;
+        }
+
+        final MimeType type = mimeType;
+
+        DataFlavor flavor;
+
+        try{
+            flavor = new DataFlavor(type.getValue() + ";class=java.io.InputStream");
+        }catch(ClassNotFoundException e){
+            throw new IllegalArgumentException(e);
+        }
+
+        final DataFlavor contentFlavor = flavor;
+
+        Transferable transferable = new Transferable(){
+            @Override
+            public DataFlavor[] getTransferDataFlavors(){
+                return new DataFlavor[]{contentFlavor};
+            }
+
+            @Override
+            public boolean isDataFlavorSupported(DataFlavor flavor){
+                return contentFlavor.equals(flavor);
+            }
+
+            @Override
+            public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException{
+                if(!isDataFlavorSupported(flavor)){
+                    throw new UnsupportedFlavorException(flavor);
+                }
+
+                return new java.io.ByteArrayInputStream(bytes);
+            }
+        };
+
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, null);
     }
 
     public static FileUpload JPanelToUpload(JPanel panel, String name){

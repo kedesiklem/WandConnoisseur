@@ -221,7 +221,7 @@ class Expression{
                 switch(this.value2){
                     case "true" -> result.setState((this.operator == Operator.EQUALS) == valueBoolean ? State.TRUE : State.FALSE);
                     case "false" -> result.setState((this.operator == Operator.DIFFERENT) == valueBoolean ? State.TRUE : State.FALSE);
-                    case default -> result.setError(ERROR_CONDITION_INVALID_BOOLEAN, new String[]{this.toString(), this.value2});
+                    default -> result.setError(ERROR_CONDITION_INVALID_BOOLEAN, new String[]{this.toString(), this.value2});
                 }
             }
             case INT -> {
@@ -456,6 +456,7 @@ public class SpellFilter{
     private static final LocalizedText ERROR_CONDITION_UNKNOWN_PROPERTY = Global.getLanguageManager().get("ERROR_CONDITION_UNKNOWN_PROPERTY");
     private static final LocalizedText ERROR_SORT_SYNTAX = Global.getLanguageManager().get("ERROR_SORT_SYNTAX");
     private static final LocalizedText ERROR_UNKNOWN_PROPERTY = Global.getLanguageManager().get("ERROR_UNKNOWN_PROPERTY");
+    private static final Pattern sortPattern = Pattern.compile("^ *(?i)([a-z0-9_]+) *(|ASC|DESC) *$");
     public static final Map<String, Function<Spell, TypedProperty>> PROPERTY_RESOLVERS = Map.ofEntries(
         // boolean
         entry("friendly_fire", spell -> new TypedProperty(PropertyType.BOOLEAN, spell.getFriendlyFire())),
@@ -498,6 +499,7 @@ public class SpellFilter{
         entry("pattern", spell -> new TypedProperty(PropertyType.INT, spell.getPattern())),
         entry("price", spell -> new TypedProperty(PropertyType.INT, spell.getPrice())),
         entry("projectile_count", spell -> new TypedProperty(PropertyType.INT, spell.getRelatedProjectileCount())),
+        entry("projectile_lifetime_base", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return new TypedProperty(PropertyType.INT, projectileComponent == null ? null : projectileComponent.getLifetime());}),
         entry("projectile_lifetime_max", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return new TypedProperty(PropertyType.INT, projectileComponent == null ? null : projectileComponent.getLifetimeMax());}),
         entry("projectile_lifetime_min", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return new TypedProperty(PropertyType.INT, projectileComponent == null ? null : projectileComponent.getLifetimeMin());}),
         entry("projectile_lifetime_randomness", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return new TypedProperty(PropertyType.INT, projectileComponent == null ? null : projectileComponent.getLifetimeRandomness());}),
@@ -631,6 +633,7 @@ public class SpellFilter{
         entry("pattern", spell -> spell.getPattern() + "°"),
         entry("price", spell -> String.valueOf(spell.getPrice())),
         entry("projectile_count", spell -> String.valueOf(spell.getRelatedProjectileCount())),
+        entry("projectile_lifetime_base", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return projectileComponent != null ? String.valueOf(projectileComponent.getLifetime()) : "<null>";}),
         entry("projectile_lifetime_max", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return projectileComponent != null ? String.valueOf(projectileComponent.getLifetimeMax()) : "<null>";}),
         entry("projectile_lifetime_min", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return projectileComponent != null ? String.valueOf(projectileComponent.getLifetimeMin()) : "<null>";}),
         entry("projectile_lifetime_randomness", spell -> {Projectile projectile = spell.getRelatedProjectile(); ProjectileComponent projectileComponent = projectile == null ? null : projectile.getProjectileComponent(); return projectileComponent != null ? String.valueOf(projectileComponent.getLifetimeRandomness()) : "<null>";}),
@@ -752,7 +755,6 @@ public class SpellFilter{
     }
 
     public Spell[] sort(Spell[] spells, String input){
-        Pattern p = Pattern.compile("^ *(?i)([a-z0-9_]+) *(|ASC|DESC) *$");
         Matcher m;
         String[] inputs = input.split(",");
         SortStruct[] sortStruct = new SortStruct[inputs.length];
@@ -762,7 +764,7 @@ public class SpellFilter{
         double[] currentComparisonValue;
 
         for(int i=0; i < inputs.length; i++){
-            m = p.matcher(inputs[i]);
+            m = sortPattern.matcher(inputs[i]);
             if(m.find()){
                 sortStruct[i] = new SortStruct(m.group(1), PROPERTY_RESOLVERS.get(m.group(1)), m.group(2).equalsIgnoreCase("DESC"));
                 if(sortStruct[i].resolver == null){

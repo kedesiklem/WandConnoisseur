@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_ROCKET_OCTAGON;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class ROCKET_OCTAGON extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "rocket_octagon.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Octagonal bolt bundle";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "rocket_octagon.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile launch 8 magical bolts if it moves slowly enough";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_ROCKET_OCTAGON()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.5, 0.6, 0.3, 0, 0, 0, 0, 0, 0);
         this.price = 200;

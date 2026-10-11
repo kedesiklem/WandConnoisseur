@@ -9,6 +9,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 class ProjectileCount{
     private Projectile projectile;
@@ -26,6 +29,32 @@ class ProjectileCount{
 
     public ProjectileCount clone(){
         return new ProjectileCount(this.projectile.clone(), this.count);
+    }
+
+    public boolean equals(ProjectileCount projectileCount){
+        if(this.count != projectileCount.count){
+            return false;
+        }
+
+        if(this.projectile == null){
+            return projectileCount.projectile == null;
+        }
+        if(projectileCount.projectile == null){
+            return false;
+        }
+
+        if(this.projectile.getClass() != projectileCount.projectile.getClass()){
+            return false;
+        }
+
+        if(this.projectile.getTriggerCastState() == null){
+            return projectileCount.projectile.getTriggerCastState() == null;
+        }
+        if(projectileCount.projectile.getTriggerCastState() == null){
+            return false;
+        }
+
+        return this.projectile.getTriggerCastState().equals(projectileCount.projectile.getTriggerCastState());
     }
 
     // getters
@@ -59,6 +88,8 @@ class CastStateProjectile{
     private final ArrayList<ProjectileCount> projectileCounts = new ArrayList<>();
     private final ArrayList<ProjectileCount> brokenProjectileCounts = new ArrayList<>();
     private boolean isBroken = false;
+    private final Hasher hasher = new Hasher();
+    private boolean hashUpdated = false;
 
     public CastStateProjectile(){
         // empty
@@ -78,6 +109,77 @@ class CastStateProjectile{
         return newCastStateProjectile;
     }
 
+    public boolean equals(CastStateProjectile castStateProjectile){
+        if(this.projectileCounts.size() != castStateProjectile.projectileCounts.size() || this.brokenProjectileCounts.size() != castStateProjectile.brokenProjectileCounts.size()){
+            return false;
+        }
+
+        for(int i=0; i < this.projectileCounts.size(); i++){
+            if(!this.projectileCounts.get(i).equals(castStateProjectile.projectileCounts.get(i))){
+                return false;
+            }
+        }
+
+        for(int i=0; i < this.brokenProjectileCounts.size(); i++){
+            if(!this.brokenProjectileCounts.get(i).equals(castStateProjectile.brokenProjectileCounts.get(i))){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public long getHash(){
+        if(!this.getHashUpdated()){
+            this.computeHash();
+        }
+
+        return this.hasher.getValue();
+    }
+
+    private void computeHash(){
+        this.hasher.reset();
+
+        this.hasher.add(this.projectileCounts.size());
+        for(ProjectileCount projectileCount : this.projectileCounts){
+            this.hasher.add(projectileCount.getProjectile().getClass());
+            if(projectileCount.getProjectile().getTriggerCastState() != null){
+                this.hasher.add(projectileCount.getProjectile().getTriggerCastState().getHash());
+            }
+        }
+
+        this.hasher.add(this.brokenProjectileCounts.size());
+        for(ProjectileCount projectileCount : this.brokenProjectileCounts){
+            this.hasher.add(projectileCount.getProjectile().getClass());
+            if(projectileCount.getProjectile().getTriggerCastState() != null){
+                this.hasher.add(projectileCount.getProjectile().getTriggerCastState().getHash());
+            }
+        }
+
+        this.hashUpdated = true;
+    }
+
+    public boolean getHashUpdated(){
+        if(!this.hashUpdated){
+            return false;
+        }
+
+        for(ProjectileCount projectileCount : this.projectileCounts){
+            if(projectileCount.getProjectile().getTriggerCastState() != null && projectileCount.getProjectile().getTriggerCastState().getHashUpdated()){
+                return false;
+            }
+        }
+
+        for(ProjectileCount projectileCount : this.brokenProjectileCounts){
+            this.hasher.add(projectileCount.getProjectile().getClass());
+            if(projectileCount.getProjectile().getTriggerCastState() != null && projectileCount.getProjectile().getTriggerCastState().getHashUpdated()){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean isBroken(){
         return this.isBroken;
     }
@@ -87,6 +189,7 @@ class CastStateProjectile{
     }
 
     public void addProjectile(Projectile projectile){
+        this.hashUpdated = false;
         ArrayList<ProjectileCount> currentProjectileCounts = this.isBroken ? this.brokenProjectileCounts : this.projectileCounts;
 
         if(projectile.getProjectileComponent() == null){
@@ -110,6 +213,7 @@ class CastStateProjectile{
             return;
         }
 
+        this.hashUpdated = false;
         ArrayList<ProjectileCount> currentProjectileCounts = this.isBroken ? this.brokenProjectileCounts : this.projectileCounts;
 
         if(projectile.getProjectileComponent() == null){
@@ -247,6 +351,21 @@ class ScriptCount{
         return new ScriptCount(this.script.clone(), this.count);
     }
 
+    public boolean equals(ScriptCount scriptCount){
+        if(this.count != scriptCount.count){
+            return false;
+        }
+
+        if(this.script == null){
+            return scriptCount.script == null;
+        }
+        if(scriptCount.script == null){
+            return false;
+        }
+
+        return this.script.getClass() == scriptCount.script.getClass();
+    }
+
     // getters
     public Script getScript(){
         return this.script;
@@ -276,6 +395,8 @@ class ScriptCount{
 
 class CastStateScript{
     private final ArrayList<ScriptCount> scriptCounts = new ArrayList<>();
+    private final Hasher hasher = new Hasher();
+    private boolean hashUpdated = false;
 
     public CastStateScript(){
         // empty
@@ -291,7 +412,45 @@ class CastStateScript{
         return newCastStateScript;
     }
 
+    public boolean equals(CastStateScript castStateScript){
+        if(this.scriptCounts.size() != castStateScript.scriptCounts.size()){
+            return false;
+        }
+
+        for(int i=0; i < this.scriptCounts.size(); i++){
+            if(!this.scriptCounts.get(i).equals(castStateScript.scriptCounts.get(i))){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public long getHash(){
+        if(!this.hashUpdated){
+            this.computeHash();
+        }
+
+        return this.hasher.getValue();
+    }
+
+    private void computeHash(){
+        this.hasher.reset();
+
+        this.hasher.add(this.scriptCounts.size());
+        for(ScriptCount scriptCount : this.scriptCounts){
+            this.hasher.add(scriptCount.getScript().getClass());
+        }
+
+        this.hashUpdated = true;
+    }
+
+    public boolean getHashUpdated(){
+        return this.hashUpdated;
+    }
+
     public void addScript(Script script){
+        this.hashUpdated = false;
         for(ScriptCount scriptCount : this.scriptCounts){
             if(scriptCount.getScript().getClass() == script.getClass()){
                 scriptCount.addCount();
@@ -305,6 +464,7 @@ class CastStateScript{
         if(count <= 0){
             return;
         }
+        this.hashUpdated = false;
         for(ScriptCount scriptCount : this.scriptCounts){
             if(scriptCount.getScript().getClass() == script.getClass()){
                 scriptCount.addCount(count);
@@ -358,6 +518,9 @@ public class CastState{
     private int materialAmount = 0;
     private StringList trailMaterial = new StringList();
     private int trailMaterialAmount = 0;
+    private String globalValues = ""; // only for hash
+    private final Hasher hasher = new Hasher();
+    private boolean hashUpdated = false;
 
     public CastState(){
         // nothing
@@ -381,11 +544,127 @@ public class CastState{
         castState.goreParticles = this.goreParticles;
         castState.bounce = this.bounce;
         castState.material = this.material;
-        castState.trailMaterialAmount = this.materialAmount;
+        castState.materialAmount = this.materialAmount;
         castState.trailMaterial = this.trailMaterial.clone();
         castState.trailMaterialAmount = this.trailMaterialAmount;
+        castState.globalValues = this.globalValues;
 
         return castState;
+    }
+
+    public boolean equals(CastState castState){
+        if(castState == null){
+            return false;
+        }
+        if(!this.castStateProjectile.equals(castState.castStateProjectile)){
+            return false;
+        }
+        if(!this.castStateScript.equals(castState.castStateScript)){
+            return false;
+        }
+        if(this.castDelay != castState.castDelay){
+            return false;
+        }
+        if(!this.damageComponent.equals(castState.damageComponent)){
+            return false;
+        }
+        if(this.lifetime != castState.lifetime){
+            return false;
+        }
+        if(this.critRate != castState.critRate){
+            return false;
+        }
+        if(this.pattern != castState.pattern){
+            return false;
+        }
+        if(this.spread != castState.spread){
+            return false;
+        }
+        if(this.screenshake != castState.screenshake){
+            return false;
+        }
+        if(this.gravity != castState.gravity){
+            return false;
+        }
+        if(this.friendlyFire != castState.friendlyFire){
+            return false;
+        }
+        if(this.speedMultiplier != castState.speedMultiplier){
+            return false;
+        }
+        if(this.goreParticles != castState.goreParticles){
+            return false;
+        }
+        if(this.bounce != castState.bounce){
+            return false;
+        }
+        if(!this.material.equals(castState.material)){
+            return false;
+        }
+        if(this.materialAmount != castState.materialAmount){
+            return false;
+        }
+        if(!this.trailMaterial.equals(castState.trailMaterial)){
+            return false;
+        }
+        if(this.trailMaterialAmount != castState.trailMaterialAmount){
+            return false;
+        }
+
+        return this.globalValues.equals(castState.globalValues);
+    }
+
+    public static boolean staticEquals(CastState first, CastState second){
+        if(first == null && second == null){
+            return true;
+        }
+        if(first == null){
+            return false;
+        }
+
+        return first.equals(second);
+    }
+
+    public long getHash(){
+        if(!this.getHashUpdated()){
+            this.computeHash();
+        }
+;
+        return this.hasher.getValue();
+    }
+
+    public static long staticHash(CastState castState){
+        return castState.getHash();
+    }
+
+    private void computeHash(){
+        this.hasher.reset();
+
+        this.hasher.add(this.castStateProjectile.getHash());
+        this.hasher.add(this.castStateScript.getHash());
+        this.hasher.add(this.castDelay);
+        this.hasher.add(this.damageComponent.getArray(false));
+        this.hasher.add(this.lifetime);
+        this.hasher.add(this.critRate);
+        this.hasher.add(this.pattern);
+        this.hasher.add(this.spread);
+        this.hasher.add(this.screenshake);
+        this.hasher.add(this.gravity);
+        this.hasher.add(this.friendlyFire);
+        this.hasher.add(this.speedMultiplier);
+        this.hasher.add(this.goreParticles);
+        this.hasher.add(this.bounce);
+        this.hasher.add(this.material);
+        this.hasher.add(this.materialAmount);
+        this.hasher.add(this.trailMaterial.getArray());
+        this.hasher.add(this.trailMaterialAmount);
+        this.hasher.add(this.globalValues);
+
+        this.hashUpdated = true;
+    }
+
+    public boolean getHashUpdated(){
+        return this.hashUpdated && this.castStateScript.getHashUpdated() && this.castStateProjectile.getHashUpdated();
     }
 
     // getters
@@ -463,91 +742,118 @@ public class CastState{
 
     // setters
     public void setCastDelay(int castDelay){
+        this.hashUpdated = false;
         this.castDelay = castDelay;
     }
 
     public void setDamage(DamageComponent damageComponent){
+        this.hashUpdated = false;
         this.damageComponent.setDamage(damageComponent);
     }
 
     public void setDamageComponent(DamageComponent damageComponent){
+        this.hashUpdated = false;
         this.damageComponent = damageComponent;
     }
 
     public void setLifetime(int lifetime){
+        this.hashUpdated = false;
         this.lifetime = lifetime;
     }
 
     public void setCritRate(int critRate){
+        this.hashUpdated = false;
         this.critRate = critRate;
     }
 
     public void setPattern(int pattern){
+        this.hashUpdated = false;
         this.pattern = pattern;
     }
 
     public void setSpread(double spread){
+        this.hashUpdated = false;
         this.spread = spread;
     }
 
     public void setGravity(double gravity){
+        this.hashUpdated = false;
         this.gravity = gravity;
     }
 
     public void setFriendlyFire(boolean friendlyFire){
+        this.hashUpdated = false;
         this.friendlyFire = friendlyFire;
     }
 
     public void setSpeedMultiplier(double speedMultiplier){
+        this.hashUpdated = false;
         this.speedMultiplier = speedMultiplier;
     }
 
     public void setGoreParticles(int goreParticles){
+        this.hashUpdated = false;
         this.goreParticles = goreParticles;
     }
 
     public void setBounce(int bounce){
+        this.hashUpdated = false;
         this.bounce = bounce;
     }
 
     public void setMaterial(String material){
+        this.hashUpdated = false;
         this.material = material;
     }
 
     public void setMaterialAmount(int materialAmount){
+        this.hashUpdated = false;
         this.materialAmount = materialAmount;
     }
 
     public void setTrailMaterialAmount(int trailMaterialAmount){
+        this.hashUpdated = false;
         this.trailMaterialAmount = trailMaterialAmount;
+    }
+
+    public void setGlobalValues(String globalValues){
+        this.hashUpdated = false;
+        this.globalValues = globalValues;
     }
 
     // adders
     public void addCastDelay(int castDelay){
+        this.hashUpdated = false;
         this.castDelay += castDelay;
     }
 
     public void addDamageComponent(DamageComponent damageComponent){
+        this.hashUpdated = false;
         this.damageComponent.add(damageComponent);
     }
 
     public void addLifetime(int lifetime){
+        this.hashUpdated = false;
         this.lifetime += lifetime;
     }
 
     public void addCritRate(int critRate){
+        this.hashUpdated = false;
         this.critRate += critRate;
     }
 
     public void addPattern(int pattern){
+        this.hashUpdated = false;
         this.pattern += pattern;
     }
 
     public void addSpread(double spread){
+        this.hashUpdated = false;
         this.spread += spread;
     }
 
     public void addScreenshake(double screenshake){
+        this.hashUpdated = false;
         this.screenshake += screenshake;
         if(this.screenshake < 0.0){
             this.screenshake = 0.0;
@@ -555,10 +861,12 @@ public class CastState{
     }
 
     public void addGravity(double gravity){
+        this.hashUpdated = false;
         this.gravity += gravity;
     }
 
     public void multiplySpeed(double speed, double min, double max){
+        this.hashUpdated = false;
         this.speedMultiplier *= speed;
         if(this.speedMultiplier > max){
             this.speedMultiplier = max;
@@ -568,10 +876,12 @@ public class CastState{
     }
 
     public void multiplySpeed(double speed){
+        this.hashUpdated = false;
         this.speedMultiplier *= speed;
     }
 
     public void addSpeed(double speed, double min, double max){
+        this.hashUpdated = false;
         this.speedMultiplier += speed;
         if(this.speedMultiplier > max){
             this.speedMultiplier = max;
@@ -581,52 +891,64 @@ public class CastState{
     }
 
     public void addSpeed(double speed){
+        this.hashUpdated = false;
         this.speedMultiplier += speed;
     }
 
     public void addGoreParticles(int goreParticles){
+        this.hashUpdated = false;
         this.goreParticles += goreParticles;
     }
 
     public void addBounce(int bounce){
+        this.hashUpdated = false;
         this.bounce += bounce;
     }
 
     public void addMaterialAmount(int materialAmount){
+        this.hashUpdated = false;
         this.materialAmount += materialAmount;
     }
 
     public void addTrailMaterial(String trailMaterial){
+        this.hashUpdated = false;
         this.trailMaterial.add(trailMaterial);
     }
 
     public void addTrailMaterialAmount(int trailMaterialAmount){
+        this.hashUpdated = false;
         this.trailMaterialAmount += trailMaterialAmount;
     }
 
     public void addProjectile(Projectile projectile){
+        this.hashUpdated = false;
         this.castStateProjectile.addProjectile(projectile);
     }
 
     public void addProjectile(Projectile projectile, int count){
+        this.hashUpdated = false;
         this.castStateProjectile.addProjectile(projectile, count);
     }
 
     public void addScript(Script script){
+        this.hashUpdated = false;
         this.castStateScript.addScript(script);
     }
 
     public void addScript(Script script, int count){
+        this.hashUpdated = false;
         this.castStateScript.addScript(script, count);
     }
 
     public void addScript(Script[] scripts){
+        this.hashUpdated = false;
         for(Script script : scripts){
             this.addScript(script);
         }
     }
 
     public CastState addProjectileTrigger(Projectile projectile, int timer, Projectile.TriggerType triggerType){
+        this.hashUpdated = false;
         CastState newCastState = new CastState();
 
         if(projectile.getProjectileComponent() == null || this.castStateProjectile.isBroken()){
@@ -640,6 +962,7 @@ public class CastState{
     }
 
     public CastState addProjectileTrigger(Projectile projectile, Projectile.TriggerType triggerType){
+        this.hashUpdated = false;
         return this.addProjectileTrigger(projectile, 0, triggerType);
     }
 
@@ -679,7 +1002,7 @@ public class CastState{
                 if(!innerBuilder.isEmpty()){
                     innerBuilder.append("\n");
                 }
-                innerBuilder.append(projectileCount.getProjectile().getEmote()).append(" x").append(projectileCount.getCount()).append("");
+                innerBuilder.append(projectileCount.getProjectile().getEmote()).append(" x").append(projectileCount.getCount());
             }
             for(ProjectileCount projectileCount : brokenMultiProjectiles){
                 if(!innerBuilder.isEmpty()){
@@ -773,14 +1096,9 @@ public class CastState{
         return this.toMenuTree("", title);
     }
 
-    public static boolean saveToImage(CastState[] castStates, String filename){
+    public static boolean saveToImage(String globalValues, String[] castValues, CastState[] castStates, String filename){
         ImageBuilder imageBuilder = new ImageBuilder(new Color(0, 0, 0));
-        imageBuilder.setFont(Global.getPixelFont().deriveFont((float)15));
-        int y = 0;
-
-        for(int i=0; i < castStates.length; i++){
-            y = castStates[i].toImage(imageBuilder, 0, y).y + 40;
-        }
+        addToImage(0, 0, imageBuilder, globalValues, castValues, castStates);
         return imageBuilder.saveAsPNG(filename);
     }
 
@@ -801,16 +1119,38 @@ public class CastState{
     public static void addToImage(int x, int y, ImageBuilder imageBuilder, String globalValues, String[] castValues, CastState[] castStates){
         imageBuilder.setFont(Global.getPixelFont().deriveFont((float)15));
         int imageSize = 16;
-        int arrowSizeX = 40;
-        int nextY = y;
-        int tempY = imageBuilder.drawTextRectangle(globalValues.split("\\r?\\n"), x, nextY, 5, Color.WHITE, Color.WHITE).y;
-        nextY = tempY + arrowSizeX;
+        int arrowSize = 40;
+        AtomicInteger nextY = new AtomicInteger(y);
+        int tempY = imageBuilder.drawTextRectangle(globalValues.split("\\r?\\n"), x, nextY.get(), 5, Color.WHITE, Color.WHITE).y;
+        int[][] maxPoints = new int[castStates.length][3]; // maxX, minY, maxY
+        nextY.set(tempY + arrowSize);
 
-        for(int i=0; i < castStates.length; i++){
-            imageBuilder.drawSingleTurnArrow(x + imageSize/2, tempY + 1, x + arrowSizeX, nextY + imageSize/2, new Color(128, 152, 198), false, false);
-            nextY = imageBuilder.drawText(((i + 1) + ")\n" + (i < castValues.length ? castValues[i] : "")).split("\\r?\\n"), x + arrowSizeX, nextY, 0, Color.WHITE).y;
-            nextY = castStates[i].toImage(imageBuilder, x + arrowSizeX, nextY).y + 40;
-        }
+        Consumer<Integer> print = index -> {
+            maxPoints[index][1] = nextY.get();
+
+            imageBuilder.drawSingleTurnArrow(x + imageSize/2, tempY + 1, x + arrowSize, nextY.get() + imageSize/2, new Color(128, 152, 198), false, false);
+            Point maxPoint = imageBuilder.drawText(((index + 1) + ")\n" + (index < castValues.length ? castValues[index] : "")).split("\\r?\\n"), x + arrowSize, nextY.get(), 0, 0, Color.WHITE);
+
+            maxPoints[index][0] = maxPoint.x;
+
+            maxPoint = castStates[index].toImage(imageBuilder, x + arrowSize, maxPoint.y);
+
+            maxPoints[index][0] = Math.max(maxPoints[index][0], maxPoint.x);
+            nextY.set(maxPoint.y + 40);
+            maxPoints[index][2] = maxPoint.y;
+        };
+
+        BiConsumer<int[], Integer> repeat = (range, count) -> {
+            int maxX = maxPoints[range[0]][0];
+            for(int i=range[0] + 1; i <= range[1]; i++){
+                maxX = Math.max(maxX, maxPoints[i][0]);
+            }
+            maxX += 10;
+            maxPoints[range[0]][0] = imageBuilder.drawCurlyBrackets(maxX, maxPoints[range[0]][1], maxX + 20, maxPoints[range[1]][2], "x" + count, Color.WHITE, false, true).x;
+        };
+
+        RecursivePatternMatcher<CastState> recursivePatternMatcher = new RecursivePatternMatcher<>(castStates, print, repeat, CastState::staticHash, CastState::staticEquals);
+        recursivePatternMatcher.process();
     }
 
     public static BufferedImage toImage(String globalValues, String[] castValues, CastState[] castStates){
@@ -945,12 +1285,28 @@ public class CastState{
         nextY += boxInsideMargin;
         nextX = Math.max(nextX, x + imageSize);
         nextY = Math.max(nextY, y + imageSize);
-        image.drawRectangle(x, y, nextX, nextY, brokenProjectileTree ? Color.red : Color.WHITE, false);
+        image.drawRectangle(x, y, nextX, nextY, brokenProjectileTree ? Color.RED : Color.WHITE, false);
 
+        Projectile lastProjectile = null;
+        CastState lastCastState = null;
+        int castStateCount = 1;
+        Point nextPoint = new Point(nextX, nextY);
+        int maxX = nextX;
         for(ArrayList<ProjectileCount> projectileCountsList : Arrays.asList(this.castStateProjectile.getProjectileCount(), this.castStateProjectile.getBrokenProjectileCount())){
             for(ProjectileCount projectileCount : projectileCountsList){
                 currentProjectile = projectileCount.getProjectile();
                 if(currentProjectile.getTriggerCastState() != null){
+                    if(lastProjectile != null && currentProjectile.getClass() == lastProjectile.getClass() && currentProjectile.getTriggerCastState().getHash() == lastCastState.getHash() && currentProjectile.getTriggerCastState().equals(lastCastState)){
+                        castStateCount++;
+                        continue;
+                    }
+                    if(castStateCount > 1){
+                        triggerY = image.drawCurlyBrackets(nextX + arrowSizeX, triggerY + boxOutsideMargin, nextPoint.x, triggerY + boxOutsideMargin + 20, "x" + castStateCount, Color.WHITE, false, false).y;
+                    }
+                    lastProjectile = currentProjectile;
+                    lastCastState = currentProjectile.getTriggerCastState();
+                    castStateCount = 1;
+
                     if(triggerY != y){
                         triggerY += boxOutsideMargin;
                     }
@@ -969,12 +1325,17 @@ public class CastState{
                             case expiration -> {if(expirationImage != null){image.addImage(expirationImage, nextX + arrowSizeX, triggerY, "EXPIRATION");}}
                         }
                     }
-                    triggerY = Math.max(triggerY, currentProjectile.getTriggerCastState().toImageNode(image, nextX + arrowSizeX + imageSize, triggerY, brokenProjectileTree).y);
-                    nextY = Math.max(nextY, triggerY);
+                    nextPoint = currentProjectile.getTriggerCastState().toImageNode(image, nextX + arrowSizeX + imageSize, triggerY, brokenProjectileTree);
+                    maxX = Math.max(maxX, nextPoint.x);
+                    triggerY = Math.max(triggerY, nextPoint.y);
+                    nextY = Math.max(nextY, nextPoint.y);
                 }
             }
         }
+        if(castStateCount > 1){
+            nextY = Math.max(nextY, image.drawCurlyBrackets(nextX + arrowSizeX, triggerY + boxOutsideMargin, nextPoint.x, triggerY + boxOutsideMargin + 20, "x" + castStateCount, Color.WHITE, false, false).y);
+        }
 
-        return new Point(nextX, nextY);
+        return new Point(maxX, nextY);
     }
 }

@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_BLACK_HOLE_GIGA;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BLACK_HOLE_GIGA extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.static_projectile;
+    static final String staticImageFile = "black_hole_giga.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Omega Black Hole";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "omega bh"};
-        this.imageFile = "black_hole_giga.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Even light dies eventually...";
-        this.type = SpellType.static_projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_BLACK_HOLE_GIGA();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
         this.price = 600;

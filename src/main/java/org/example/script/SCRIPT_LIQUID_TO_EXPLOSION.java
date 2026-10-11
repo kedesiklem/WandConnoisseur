@@ -1,16 +1,20 @@
 package org.example.script;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class SCRIPT_LIQUID_TO_EXPLOSION extends Script{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "liquid_to_explosion.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Liquid Detonation";
-        this.imageFile = "liquid_to_explosion.png";
+        this.image = staticImage;
         this.emote = staticEmote;
     }
 }

@@ -1,16 +1,20 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.ProjectileComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_VACUUM_POWDER extends ProjectileBaseField{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "vacuum_powder.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_VACUUM_POWDER(){
         this.name = "Powder Vacuum Field";
-        this.imageFile = "vacuum_powder.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.projectileComponent = (this.projectileComponent == null ? new ProjectileComponent() : this.projectileComponent)
             // damage_game_effect_entities=""

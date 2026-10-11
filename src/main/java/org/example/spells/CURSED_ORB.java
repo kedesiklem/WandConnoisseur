@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_CURSED_ORB;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class CURSED_ORB extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "cursed_orb.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Cursed Sphere";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "cursed_orb.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A projectile that brings bad luck to anyone it hits";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_CURSED_ORB();
         this.spawnProbabilities = new SpawnProbabilities(0, 0.3, 0.2, 0.1, 0, 0, 0, 0, 0, 0, 0);
         this.price = 200;

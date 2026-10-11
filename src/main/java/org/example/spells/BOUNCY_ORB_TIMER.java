@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.projectiles.Projectile;
 import org.example.projectiles.PROJECTILE_BOUNCY_ORB;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BOUNCY_ORB_TIMER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "bouncy_orb_timer.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Energy sphere with timer";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "energy sphere timer", "sphere timer"};
-        this.imageFile = "bouncy_orb_timer.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A fast, arcing projectile that casts another spell after a timer runs out";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_BOUNCY_ORB();
         this.triggerType = Projectile.TriggerType.timer;
         this.timerLength = 200;

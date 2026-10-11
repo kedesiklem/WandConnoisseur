@@ -109,11 +109,18 @@ public class CommandListener extends ListenerAdapter{
                 currentCommand.setDescriptionLocalization(LanguageManager.languageToDiscordLocale(language), commandLocal.getDescription().get(language));
             }
             for(CommandOption option : commandLocal.getCommandOptions()){
-                currentOption = new OptionData(option.optionType(), option.name().get(Language.en), option.description().get(Language.en), option.required(), option.autoComplete());
+                currentOption = new OptionData(option.optionType(), option.name().get(Language.en), option.description().get(Language.en), option.required(), option.autoComplete() && (option.staticChoices() == null || option.staticChoices().length == 0));
                 for(Language language : Language.values()){
                     currentOption.setNameLocalization(LanguageManager.languageToDiscordLocale(language), option.name().get(language));
                     currentOption.setDescriptionLocalization(LanguageManager.languageToDiscordLocale(language), option.description().get(language));
                 }
+
+                if(option.staticChoices() != null){
+                    for(String choice : option.staticChoices()){
+                        currentOption.addChoice(choice, choice);
+                    }
+                }
+
                 currentCommand.addOptions(currentOption);
             }
             commandsList = commandsList.addCommands(currentCommand);

@@ -1,15 +1,19 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_CIRCLE_FIRE extends Projectile{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "circle_fire.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_CIRCLE_FIRE(){
         this.name = "Circle of fire";
-        this.imageFile = "circle_fire.png";
+        this.image = staticImage;
         this.emote = staticEmote;
     }
 }

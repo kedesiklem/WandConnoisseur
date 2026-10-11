@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_VACUUM_POWDER;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class VACUUM_POWDER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.static_projectile;
+    static final String staticImageFile = "vacuum_powder.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Powder Vacuum Field";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "vacuum_powder.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Sucks powder-like materials nearby and releases them upon expiring";
-        this.type = SpellType.static_projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_VACUUM_POWDER();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.3, 0.7, 0, 0.3, 0.4, 0, 0, 0, 0);
         this.price = 150;

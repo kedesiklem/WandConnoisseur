@@ -7,31 +7,31 @@ import org.example.projectiles.Projectile;
 import org.example.script.Script;
 
 import java.awt.*;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import javax.imageio.ImageIO;
-import javax.swing.*;
 
 public abstract class Spell{
     public enum SpellType {projectile, static_projectile, passif, utility, modifier, material, multicast, other};
     protected final static int recursionLimit = 2;
+    protected boolean modded = false;
+    protected boolean alwaysCast = false;
     protected String name = "spell_name";
     protected String[] alias = new String[0];
     protected static final String imagePath = "./src/main/java/org/example/image/spell/";
-    protected String imageFile = "_unidentified.png";
-    protected String typeFile = "item_bg_other.png";
-    protected static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    protected static final String staticImageFile = "_unidentified.png";
+    protected String imageFile = staticImageFile;
+    protected static final SpellType staticType = SpellType.other;
+    protected SpellType type = staticType;
+    protected static final BufferedImage[] staticTypeImages = loadTypeImages();
+    protected static final BufferedImage[] staticTypeImagesEmote = loadTypeImagesEmote();
+    protected static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
+    protected BufferedImage image = staticImage;
+    protected static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
     protected String emote = staticEmote;
-    protected String defaultImage = "_unidentified.png";
+    protected static final String defaultImage = "_unidentified.png";
     protected String description = "this spell does things";
-    protected JLabel imageLabel = null;
-    protected JLabel chargeLabel = null;
-    protected BufferedImage image = null;
-    protected int imageScaleFactor = 1;
-    protected SpellType type = SpellType.other;
     protected Projectile relatedProjectile = null;
     protected int relatedProjectileCount = 1;
     protected Script[] relatedScripts = new Script[0];
@@ -96,20 +96,17 @@ public abstract class Spell{
             return null;
         }
 
+        newSpell.modded = this.modded;
+        newSpell.alwaysCast = this.alwaysCast;
         newSpell.name = this.name;
         newSpell.alias = new String[this.alias.length];
         System.arraycopy(this.alias, 0, newSpell.alias, 0, newSpell.alias.length);
         newSpell.imageFile = this.imageFile;
-        newSpell.typeFile = this.typeFile;
+        newSpell.image = this.image;
         newSpell.emote = this.emote;
-        newSpell.defaultImage = this.defaultImage;
         newSpell.description = this.description;
-        newSpell.image = Global.cloneBufferedImage(this.image); // clone
-        newSpell.imageScaleFactor = this.imageScaleFactor;
         newSpell.type = this.type;
-        if(this.relatedProjectile != null){
-            newSpell.relatedProjectile = this.relatedProjectile.clone(); // clone
-        }
+        newSpell.relatedProjectile = this.relatedProjectile == null ? null : this.relatedProjectile.clone(); // clone
         newSpell.relatedProjectileCount = this.relatedProjectileCount;
         newSpell.relatedScripts = new Script[this.relatedScripts.length];
         for(int i=0; i < newSpell.relatedScripts.length; i++){
@@ -150,14 +147,19 @@ public abstract class Spell{
         newSpell.materialAmount = this.materialAmount;
         newSpell.trailMaterial = this.trailMaterial;
         newSpell.trailMaterialAmount = this.trailMaterialAmount;
-        if(this.imageLabel != null){
-            newSpell.imageInJLabel();
-        }
 
         return newSpell;
     }
 
     // getters
+    public boolean getIsModded(){
+        return this.modded;
+    }
+
+    public boolean getAlwaysCast(){
+        return this.alwaysCast;
+    }
+
     public String getName(){
         return this.name;
     }
@@ -166,29 +168,33 @@ public abstract class Spell{
         return this.alias;
     }
 
+    public String getShortestAlias(){
+        String result = null;
+
+        for(String alias : this.alias){
+            if(result == null || alias.length() < result.length()){
+                result = alias;
+            }
+        }
+
+        return result == null ? "" : result;
+    }
+
     public String getAliasString(){
-        String result = "[";
+        StringBuilder result = new StringBuilder("[");
 
         if(this.alias.length > 0){
-            result += "\"" + this.alias[0] + "\"";
+            result.append("\"").append(this.alias[0]).append("\"");
         }
         for(int i=1; i < this.alias.length; i++){
-            result += ", \"" + this.alias[i] + "\"";
+            result.append(", \"").append(this.alias[i]).append("\"");
         }
 
         return result + "]";
     }
 
-    public String getFullImagePath(){
-        return imagePath + this.imageFile;
-    }
-
-    public String getImagePath(){
+    public static String getImagePath(){
         return imagePath;
-    }
-
-    public String getImageFile(){
-        return this.imageFile;
     }
 
     public String getEmote(){
@@ -229,46 +235,6 @@ public abstract class Spell{
 
     public int getNbTier(){
         return this.spawnProbabilities.nbTier();
-    }
-
-    public int getImageScaleFactor(){
-        return this.imageScaleFactor;
-    }
-
-    public JLabel getImageLabel(){
-        if(this.image == null){
-            this.loadImage();
-            this.imageInJLabel();
-        }
-        return this.imageLabel;
-    }
-
-    public JLabel getImageLabelCopy(){
-        JLabel newLabel = new JLabel();
-        if(this.image == null){
-            this.loadImage();
-        }
-        if(this.image != null){
-            newLabel.setIcon(new ImageIcon(scaleImage(this.image, this.imageScaleFactor)));
-            newLabel.setSize(this.image.getWidth()*this.imageScaleFactor, this.image.getHeight()*this.imageScaleFactor);
-            this.chargeLabel.setSize(Global.getBaseImageSize()*this.imageScaleFactor, Global.getBaseImageSize()*this.imageScaleFactor);
-            this.chargeLabel.setLocation((this.imageLabel.getWidth() - this.chargeLabel.getWidth())/2, (this.imageLabel.getHeight() - this.chargeLabel.getHeight())/2);
-        }
-        return newLabel;
-    }
-
-    public JLabel getImageLabelCopy(int imageScaleFactor){
-        JLabel newLabel = new JLabel();
-        if(this.image == null){
-            this.loadImage();
-        }
-        if(this.image != null){
-            newLabel.setIcon(new ImageIcon(scaleImage(this.image, imageScaleFactor)));
-            newLabel.setSize(this.image.getWidth()*imageScaleFactor, this.image.getHeight()*imageScaleFactor);
-            this.chargeLabel.setSize(Global.getBaseImageSize()*this.imageScaleFactor, Global.getBaseImageSize()*this.imageScaleFactor);
-            this.chargeLabel.setLocation((this.imageLabel.getWidth() - this.chargeLabel.getWidth())/2, (this.imageLabel.getHeight() - this.chargeLabel.getHeight())/2);
-        }
-        return newLabel;
     }
 
     public boolean getRecursive(){
@@ -337,10 +303,6 @@ public abstract class Spell{
     }
 
     public BufferedImage getImage(){
-        if(this.image == null){
-            this.loadImage();
-            this.imageInJLabel();
-        }
         return this.image;
     }
 
@@ -450,7 +412,7 @@ public abstract class Spell{
         if(this.setRechargeTime || this.rechargeTime != 0){innerString.append("\nRecharge time: ").append(this.setRechargeTime ? "=" : "").append(Global.delayFormat(this.rechargeTime));}
         for(DamageType damageType : DamageType.values()){
             if(this.damageComponent.getDamage(damageType) != 0.0){
-                innerString.append(innerString.isEmpty() ? "" : "\n").append(damageType.getDisplayName()).append(" damage: ").append(this.damageComponent.getDamage(damageType));
+                innerString.append("\n").append(damageType.getDisplayName()).append(" damage: ").append(this.damageComponent.getDamage(damageType));
             }
         }
         if(this.lifetime != 0){innerString.append("\nLifetime: ").append(this.lifetime).append("f");}
@@ -478,7 +440,7 @@ public abstract class Spell{
         if(this.relatedProjectile != null){
             innerString.append(this.relatedProjectile.toString(importantOnly));
             if(!innerString.isEmpty()){
-                result.append("\n\n# Related projectile\n").append(innerString.toString());
+                result.append("\n\n# Related projectile\n").append(innerString);
                 innerString.setLength(0);
             }
         }
@@ -491,43 +453,41 @@ public abstract class Spell{
         this.name = name;
     }
 
-    public void setType(SpellType type){
-        this.type = type;
-    }
-
-    public void setImageScaleFactor(int imageScaleFactor){
-        this.imageScaleFactor = imageScaleFactor;
-    }
-
-    public void setLocation(int x, int y){
-        if(this.imageLabel != null){
-            this.imageLabel.setLocation(x, y);
-        }
+    public void setAlwaysCast(boolean alwaysCast){
+        this.alwaysCast = alwaysCast;
     }
 
     public void setCharges(int charges){
+        if(this.alwaysCast){
+            return;
+        }
         this.chargesLeft = Math.max(Math.min(charges, this.maxCharges), 0);
-        this.updateChargeLabel();
     }
 
     public void refillCharges(){
+        if(this.alwaysCast){
+            return;
+        }
         if(this.hasCharges){
             this.chargesLeft = this.maxCharges;
-            this.updateChargeLabel();
         }
     }
 
     public void removeCharge(){
+        if(this.alwaysCast){
+            return;
+        }
         if(this.hasCharges && this.chargesLeft > 0){
             this.chargesLeft--;
-            this.updateChargeLabel();
         }
     }
 
     public void removeAllCharges(){
+        if(this.alwaysCast){
+            return;
+        }
         if(this.hasCharges){
             this.chargesLeft = 0;
-            this.updateChargeLabel();
         }
     }
 
@@ -535,65 +495,76 @@ public abstract class Spell{
         if(this.hasCharges && !this.neverUnlimited){
             this.refillCharges();
             this.hasCharges = false;
-            this.updateChargeLabel();
         }
     }
 
-    private void updateChargeLabel(){
-        if(this.chargeLabel != null){
-            if(this.hasCharges){
-                this.chargeLabel.setText(String.valueOf(this.chargesLeft));
-            }else{
-                this.chargeLabel.setText("");
-            }
-        }
-    }
+    private static BufferedImage[] loadTypeImages(){
+        BufferedImage[] result = new BufferedImage[SpellType.values().length];
+        int id = 0;
 
-    protected boolean loadImage(){
-        boolean result = true;
-        BufferedImage imageType;
-
-        this.typeFile = this.getTypeImage();
-        try{
-            this.image = ImageIO.read(new File(imagePath + this.imageFile));
-        }catch(IOException e1){
-            try{
-                this.image = ImageIO.read(new File(imagePath + this.defaultImage));
-                System.out.println(imagePath + this.imageFile + " not found, using default image");
-            }catch(IOException e2){
-                // no image
-                System.out.println("no image found for " + this.name);
-                result = false;
-            }
+        for(SpellType spellType : SpellType.values()){
+            result[id] = Global.loadImage(imagePath + getTypeImage(spellType));
+            id++;
         }
 
-        if(result){
-            try{
-                imageType = ImageIO.read(new File(imagePath + this.typeFile));
-                this.image = combineImages(imageType, this.image, null);
-            }catch(IOException e1){
-                System.out.println(imagePath + this.typeFile + " not found");
-            }
-        }
         return result;
+    }
+
+    private static BufferedImage[] loadTypeImagesEmote(){
+        BufferedImage[] result = new BufferedImage[SpellType.values().length];
+        int id = 0;
+
+        for(SpellType spellType : SpellType.values()){
+            result[id] = Global.loadImage(imagePath + getTypeImageEmote(spellType));
+            id++;
+        }
+
+        return result;
+    }
+
+    protected static BufferedImage loadImage(SpellType spellType, String imageFile){
+        BufferedImage image = Global.loadImage(imagePath + imageFile);
+
+        if(image == null){
+            image = Global.loadImage(imagePath + defaultImage);
+            if(image == null){
+                System.out.println("no image found for " + imageFile);
+                return null;
+            }else{
+                System.out.println("using default image found for " + imageFile);
+            }
+        }
+
+        BufferedImage imageType = staticTypeImages[spellType.ordinal()];
+        if(imageType == null){
+            System.out.println("no type found for " + imageFile);
+            return image;
+        }
+
+        return combineImages(imageType, image, null);
     }
 
     public void createEmote(){
         try{
-            BufferedImage type = ImageIO.read(new File(imagePath + this.getTypeImageEmote()));
+            BufferedImage typeImage = staticTypeImagesEmote[this.type.ordinal()];
+            if(typeImage == null){
+                System.out.println("Error trying to create emote for spell \"" + this.name + "\" : type image is null.");
+                return;
+            }
+
             String name = this.getClass().getSimpleName().toLowerCase();
             if(name.equals("")){
                 name = "spell";
             }
             name = Global.truncate(name, 32);
-            ImageIO.write(scaleImage(combineImages(type, ImageIO.read(new File(imagePath + this.imageFile)), new Color(54, 43, 39)), 8),"png",new File(Global.getPathOutput() + name + ".png"));
-        }catch(IOException e){
+            ImageIO.write(Global.scaleImage(combineImages(typeImage, Global.loadImage(imagePath + this.imageFile), new Color(54, 43, 39)), 8), "png", new File(Global.getPathOutput() + name + ".png"));;
+        }catch(Exception e){
             System.out.println("Error trying to create emote for spell \"" + this.name + "\" : " + e.getMessage());
         }
     }
 
-    private String getTypeImage(){
-        return switch(this.type){
+    private static String getTypeImage(SpellType spellType){
+        return switch(spellType){
             case projectile -> "item_bg_projectile.png";
             case static_projectile -> "item_bg_static_projectile.png";
             case passif -> "item_bg_passive.png";
@@ -605,8 +576,12 @@ public abstract class Spell{
         };
     }
 
-    private String getTypeImageEmote(){
-        return switch(this.type){
+    private String getTypeImage(){
+        return getTypeImage(this.type);
+    }
+
+    private static String getTypeImageEmote(SpellType spellType){
+        return switch(spellType){
             case projectile -> "item_bg_projectile_emote.png";
             case static_projectile -> "item_bg_static_projectile_emote.png";
             case passif -> "item_bg_passive_emote.png";
@@ -618,7 +593,11 @@ public abstract class Spell{
         };
     }
 
-    public boolean imageInJLabel(){
+    private String getTypeImageEmote(){
+        return getTypeImageEmote(this.type);
+    }
+
+    /*public boolean imageInJLabel(){
         if(this.imageLabel == null){
             // TODO à refaire
             this.chargeLabel = new JLabel("0"){
@@ -661,23 +640,7 @@ public abstract class Spell{
         }else{
             return false;
         }
-    }
-
-    private BufferedImage scaleImage(BufferedImage originalImage, int scaleFactor){
-        int newWidth = originalImage.getWidth() * scaleFactor;
-        int newHeight = originalImage.getHeight() * scaleFactor;
-        BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = scaledImage.createGraphics();
-
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-
-        g2d.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
-        g2d.dispose();
-
-        return scaledImage;
-    }
+    }*/
 
     private static BufferedImage combineImages(BufferedImage img1, BufferedImage img2, Color backgroundColor){
         int width = Math.max(img1.getWidth(), img2.getWidth());
@@ -712,39 +675,28 @@ public abstract class Spell{
     }
 
     public void copy(CardPool cardPool, CastState castState, Spell spell, int recursionLevel, int iterationLevel, boolean disableDraw){
-        Flowchart currentNode = null;
-        Flowchart newNode = null;
         int nextRecursionLevel = recursionLevel;
-        boolean makeFlowchart = cardPool.getAutoFlowchart() || cardPool.getAutoCardHistory();
 
-        if(makeFlowchart){
-            currentNode = cardPool.getCallStack();
-            newNode = currentNode.add(spell);
-            newNode.setIsCopy(true);
+        if(spell == null){
+            return;
         }
 
-        if(spell != null){
-            if(spell.recursive){
-                nextRecursionLevel = recursionLevel + 1;
-            }
+        if(spell.recursive){
+            nextRecursionLevel = recursionLevel + 1;
+        }
 
-            if(nextRecursionLevel <= recursionLimit){
-                if(makeFlowchart){
-                    cardPool.addCallStack(newNode);
-                }
-                if(disableDraw){
-                    cardPool.disableDraw();
-                }
-                spell.doAction(cardPool, castState, nextRecursionLevel, iterationLevel);
-                if(disableDraw){
-                    cardPool.enableDraw();
-                }
-                if(makeFlowchart){
-                    cardPool.removeCallStack();
-                }
-            }else if(makeFlowchart){
-                newNode.setCopyFailed(true);
+        if(nextRecursionLevel <= recursionLimit){
+            cardPool.addCallStackCopy(spell, false);
+            if(disableDraw){
+                cardPool.disableDraw();
             }
+            spell.doAction(cardPool, castState, nextRecursionLevel, iterationLevel);
+            if(disableDraw){
+                cardPool.enableDraw();
+            }
+            cardPool.removeCallStack();
+        }else{
+            cardPool.addCallStackCopy(spell, true);
         }
     }
 
@@ -841,8 +793,8 @@ public abstract class Spell{
     }
 
     public boolean containsAlias(String alias){
-        for(int i=0; i < this.alias.length; i++){
-            if(this.alias[i].equals(alias)){
+        for(String s : this.alias){
+            if(s.equals(alias)){
                 return true;
             }
         }

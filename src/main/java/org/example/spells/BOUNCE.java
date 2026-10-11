@@ -3,19 +3,24 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BOUNCE extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "bounce.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Bounce";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "bounce.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile bounce on impact";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 1, 1, 0.4, 0, 0.2, 0, 0, 0, 0);
         this.price = 50;
         this.manaCost = 0;

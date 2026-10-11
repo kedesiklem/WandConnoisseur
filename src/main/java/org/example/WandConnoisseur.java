@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.config.BotConfig;
 import org.example.config.EmoteConfig;
+import org.example.GUI.MainWindow;
 import org.example.listeners.AutoCompleteListener;
 import org.example.listeners.CommandListener;
 import org.example.listeners.MenuListener;
@@ -73,23 +74,24 @@ public class WandConnoisseur{
     // TODO
     // better autocomplete for conditions
     // mob quizz (audio ?)
-    // shuffle
-    // always cast
     // code every spell
+    // circular array for cardPool
     // put on the raspberry
     public static void main(String[] args){
-        String botToken = BotConfig.getBotToken();
         boolean generateEmotes = false;
         boolean generateNewEmotes = false;
         boolean generateWandstat = false;
-
-        Global.autoDeleteFiles();
+        boolean generateWandstatSVG = false;
+        boolean localMod = false;
 
         for(String arg : args){
             switch(arg){
                 case "-emote" -> generateEmotes = true;
                 case "-emote_new" -> generateNewEmotes = true;
+                case "-local" -> localMod = true;
+                case "-modded" -> Global.modded = true;
                 case "-wandstat" -> generateWandstat = true;
+                case "-wandstat_svg" -> generateWandstatSVG = true;
                 default -> {
                     System.err.println("Unknown option: " + arg);
                     System.exit(1);
@@ -97,37 +99,47 @@ public class WandConnoisseur{
             }
         }
 
+        Global.autoDeleteFiles();
+
         if(generateEmotes){
             generateEmotes(false);
         }
         if(generateWandstat){
-            new WandList().generateAllSprites();
+            new WandList().generateAllSprites(false);
+        }
+        if(generateWandstatSVG){
+            new WandList().generateAllSprites(true);
         }
 
-        if(botToken == null || botToken.isEmpty()){
-            logger.error("Bot token not found in config.properties. Please provide a valid token.");
-            return;
-        }
-
-        try{
-            // Build JDA instance
-            jda = JDABuilder.createDefault(botToken)
-                .enableIntents(EnumSet.allOf(GatewayIntent.class))
-                .addEventListeners(new AutoCompleteListener())
-                .addEventListeners(new CommandListener())
-                .addEventListeners(new MenuListener())
-                .build();
-
-            jda.awaitReady();
-
-            CommandListener.registerSlashCommands();
-            if(generateNewEmotes){
-                generateEmotes(true);
+        if(localMod){
+            MainWindow.getInstance().run();
+        }else{
+            String botToken = BotConfig.getBotToken();
+            if(botToken == null || botToken.isEmpty()){
+                logger.error("Bot token not found in config.properties. Please provide a valid token.");
+                return;
             }
-            EmoteConfig.initConfig(true);
-            logger.info("Bot is online and ready!");
-        }catch(Exception e){
-            logger.error("Error starting the bot: ", e);
+
+            try{
+                // Build JDA instance
+                jda = JDABuilder.createDefault(botToken)
+                    .enableIntents(EnumSet.allOf(GatewayIntent.class))
+                    .addEventListeners(new AutoCompleteListener())
+                    .addEventListeners(new CommandListener())
+                    .addEventListeners(new MenuListener())
+                    .build();
+
+                jda.awaitReady();
+
+                CommandListener.registerSlashCommands();
+                if(generateNewEmotes){
+                    generateEmotes(true);
+                }
+                EmoteConfig.initConfig(true);
+                logger.info("Bot is online and ready!");
+            }catch(Exception e){
+                logger.error("Error starting the bot: ", e);
+            }
         }
     }
 }

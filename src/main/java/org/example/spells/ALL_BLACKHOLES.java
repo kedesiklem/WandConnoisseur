@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_ALL_BLACKHOLES;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class ALL_BLACKHOLES extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "all_blackholes.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Spells to black holes";
-        //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "all_blackholes.png";
+        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "spells to bh"};
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Transforms every projectile currently in the air into a black hole";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_ALL_BLACKHOLES();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0.1, 0, 0, 0.05, 0, 0, 0, 1);
         this.price = 500;

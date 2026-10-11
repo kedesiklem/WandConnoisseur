@@ -1,16 +1,20 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.VelocityComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_TENTACLE_PORTAL extends ProjectileBase{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "tentacle_portal.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_TENTACLE_PORTAL(){
         this.name = "Eldritch Portal";
-        this.imageFile = "tentacle_portal.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.velocityComponent = (this.velocityComponent == null ? new VelocityComponent() : this.velocityComponent)
             .setGravityY(0.0)

@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_HITFX_EXPLOSION_ALCOHOL;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class HITFX_EXPLOSION_ALCOHOL extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "explode_on_alcohol.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Explosion on drunk enemies";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "explosion on alcohol"};
-        this.imageFile = "explode_on_alcohol.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile explode upon collision with creatures covered in alcohol";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_HITFX_EXPLOSION_ALCOHOL()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.3, 0, 0.2, 0.2, 0.2, 0, 0, 0, 0, 0);
         this.price = 140;

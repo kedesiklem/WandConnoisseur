@@ -15,6 +15,10 @@ public class DeckAnimationCommand extends CommandLocal{
     private static final LocalizedText COMMAND_DECK_ANIMATION_DESCRIPTION = Global.getLanguageManager().get("COMMAND_DECK_ANIMATION_DESCRIPTION");
     private static final LocalizedText COMMAND_GENERAL_SPELLS = Global.getLanguageManager().get("COMMAND_GENERAL_SPELLS");
     private static final LocalizedText COMMAND_GENERAL_SPELLS_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_SPELLS_DESCRIPTION");
+    private static final LocalizedText COMMAND_GENERAL_ALWAYS_CAST = Global.getLanguageManager().get("COMMAND_GENERAL_ALWAYS_CAST");
+    private static final LocalizedText COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION");
+    private static final LocalizedText COMMAND_GENERAL_SHUFFLE = Global.getLanguageManager().get("COMMAND_GENERAL_SHUFFLE");
+    private static final LocalizedText COMMAND_GENERAL_SHUFFLE_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_SHUFFLE_DESCRIPTION");
     private static final LocalizedText COMMAND_GENERAL_DRAW = Global.getLanguageManager().get("COMMAND_GENERAL_DRAW");
     private static final LocalizedText COMMAND_GENERAL_DRAW_DESCRIPTION = Global.getLanguageManager().get("COMMAND_GENERAL_DRAW_DESCRIPTION");
     private static final LocalizedText COMMAND_GENERAL_CAST_DELAY = Global.getLanguageManager().get("COMMAND_GENERAL_CAST_DELAY");
@@ -36,6 +40,8 @@ public class DeckAnimationCommand extends CommandLocal{
         this.description = COMMAND_DECK_ANIMATION_DESCRIPTION;
         this.commandOptions = new CommandOption[]{
             new CommandOption(OptionType.STRING, COMMAND_GENERAL_SPELLS, COMMAND_GENERAL_SPELLS_DESCRIPTION, false, true),
+            new CommandOption(OptionType.STRING, COMMAND_GENERAL_ALWAYS_CAST, COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION, false, true),
+            new CommandOption(OptionType.BOOLEAN, COMMAND_GENERAL_SHUFFLE, COMMAND_GENERAL_SHUFFLE_DESCRIPTION, false, false),
             new CommandOption(OptionType.INTEGER, COMMAND_GENERAL_DRAW, COMMAND_GENERAL_DRAW_DESCRIPTION, false, false),
             new CommandOption(OptionType.STRING, COMMAND_GENERAL_CAST_DELAY, COMMAND_GENERAL_CAST_DELAY_DESCRIPTION, false, true),
             new CommandOption(OptionType.STRING, COMMAND_GENERAL_RECHARGE_TIME, COMMAND_GENERAL_RECHARGE_TIME_DESCRIPTION, false, true),

@@ -143,7 +143,7 @@ public class ProjectileComponent{
         int lifetimeMin = this.lifetime - this.lifetimeRandomness;
         int lifetimeMax = this.lifetime + this.lifetimeRandomness;
 
-        return lifetimeMin == lifetimeMax ? "" + lifetimeMin : "[" + lifetimeMin + "; " + lifetimeMax + "]";
+        return lifetimeMin == lifetimeMax ? "" + lifetimeMin : "[" + lifetimeMin + ", " + lifetimeMax + "]";
     }
 
     public boolean getOnLifetimeOutExplode(){
@@ -163,7 +163,7 @@ public class ProjectileComponent{
     }
 
     public String getSpeedString(){
-        return this.speedMin == this.speedMax ? "" + this.speedMin : "[" + this.speedMin + "; " + this.speedMax + "]";
+        return this.speedMin == this.speedMax ? "" + this.speedMin : "[" + this.speedMin + ", " + this.speedMax + "]";
     }
 
     public double getFriction(){

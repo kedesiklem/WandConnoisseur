@@ -23,12 +23,12 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-
 public class MenuDeckAnimation extends Menu{
     private static final LocalizedText ERROR_ID_OOB = Global.getLanguageManager().get("ERROR_ID_OOB");
     private static final LocalizedText ERROR_INVALID_NUMBER = Global.getLanguageManager().get("ERROR_INVALID_NUMBER");
     private static final LocalizedText MESSAGE_GOTO = Global.getLanguageManager().get("MESSAGE_GOTO");
     private static final LocalizedText MESSAGE_ID = Global.getLanguageManager().get("MESSAGE_ID");
+    private static final Pattern idPattern = Pattern.compile("^([0-9]+):([0-9]+)$");
     private final CardHistory cardHistory;
 
     public MenuDeckAnimation(String id, String title, String description, CardHistory cardHistory){
@@ -93,7 +93,7 @@ public class MenuDeckAnimation extends Menu{
         }
 
         input = valueOption.getAsString();
-        m = Pattern.compile("^([0-9]+):([0-9]+)$").matcher(input);
+        m = idPattern.matcher(input);
         if(m.find()){
             try{
                 value = Integer.parseInt(m.group(1));

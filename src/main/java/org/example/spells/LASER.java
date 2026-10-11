@@ -6,19 +6,24 @@ import org.example.projectiles.PROJECTILE_LASER;
 import org.example.script.Script;
 import org.example.script.SCRIPT_EFFECT_DISINTEGRATED;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class LASER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "laser.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Concentrated Light";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "conc light"};
-        this.imageFile = "laser.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A pinpointed beam of light";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_LASER();
         this.relatedScripts = new Script[]{new SCRIPT_EFFECT_DISINTEGRATED()};
         this.spawnProbabilities = new SpawnProbabilities(0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0);

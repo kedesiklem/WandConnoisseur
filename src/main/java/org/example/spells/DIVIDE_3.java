@@ -4,20 +4,25 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.main.Global.DamageType;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class DIVIDE_3 extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "divide_3.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
     private int lastIteration = 0;
 
     @Override
     protected void initialization(){
         this.name = "Divide By 3";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "d3"};
-        this.imageFile = "divide_3.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts the next spell 3 times, but with reduced damage";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0.1, 0.1, 0.2, 0, 0, 0, 1);
         this.price = 250;
         this.manaCost = 50;
@@ -66,7 +71,6 @@ public class DIVIDE_3 extends Spell{
                     iter_max = imax;
                 }
             }
-            // TODO does not remove a charge if already removed this cast
             currentSpell.removeCharge();
 
             if(iterationLevel == 1 && !copyFailed){

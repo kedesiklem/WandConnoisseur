@@ -3,19 +3,24 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class TINY_GHOST extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.passif;
+    static final String staticImageFile = "tiny_ghost.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Summon Tiny Ghost";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "ghost"};
-        this.imageFile = "tiny_ghost.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Summons a tiny ethereal being to your help";
-        this.type = SpellType.passif;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0.1, 0.5, 1, 0.8, 0.7, 0.5, 0, 0, 0, 0);
         this.price = 160;
         this.manaCost = 0;

@@ -3,19 +3,24 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class DRAW_RANDOM_X3 extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "draw_random_x3.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Copy random spell thrice";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "cr3"};
-        this.imageFile = "draw_random_x3.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts a random spell among the spells in your wand three times!";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0.1, 0.3, 0.1, 0.1, 0, 0, 0, 1);
         this.recursive = true;
         this.price = 250;
@@ -44,7 +49,6 @@ public class DRAW_RANDOM_X3 extends Spell{
                 for(int i=0; i < 3; i++){
                     copy(cardPool, castState, currentSpell, recursionLevel);
                 }
-                // TODO does not remove a charge if already removed this cast
                 currentSpell.removeCharge();
                 return;
             }

@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_EXPLOSION_REMOVE;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class EXPLOSION_REMOVE extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "explosion_remove.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Remove Explosion";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "explosion_remove.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile no longer explode";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_EXPLOSION_REMOVE()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.2, 0, 0.6, 0.7, 0.2, 0, 0, 0, 0);
         this.price = 50;

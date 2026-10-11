@@ -1,18 +1,22 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 import org.example.main.VelocityComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_TELEPORT_PROJECTILE_SHORT extends ProjectileBase{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "teleport_projectile_short.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_TELEPORT_PROJECTILE_SHORT(){
         this.name = "Small Teleport Bolt";
-        this.imageFile = "teleport_projectile_short.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.velocityComponent = (this.velocityComponent == null ? new VelocityComponent() : this.velocityComponent)
             .setGravityY(200.0)

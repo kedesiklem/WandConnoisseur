@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_RANDOM_EXPLOSION;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class RANDOM_EXPLOSION extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "random_explosion.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Chaos magic";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "random_explosion.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile launch a random spell (out of a limited selection) when it hits something";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_RANDOM_EXPLOSION()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0.3, 0, 0.6, 1, 0, 0, 0, 0);
         this.price = 240;

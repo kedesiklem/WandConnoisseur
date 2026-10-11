@@ -1,16 +1,11 @@
 package org.example.main;
 
-import static org.example.main.Global.*;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.IllegalFormatException;
-import java.util.Random;
-import java.util.Scanner;
-import javax.imageio.ImageIO;
-import javax.swing.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
 
 enum RangeType{BETWEEN, GREATER_OR_EQUAL, LESS_OR_EQUAL}
 
@@ -393,99 +388,53 @@ class WandStat{
         return 0;
     }
 
-    public JPanel getJPanel(){
-        int baseIconSize = Global.getBaseIconSize();
-        int imageScaleFactor = Global.getImageScaleFactor();
-        int margin = Global.getMargin();
-        Color backgroundColor = new Color(0, 0, 0);
-        Color textColor = new Color(255, 255, 255);
-        BufferedImage statJPanelImage;
-        int JPanelWidth;
-        int JPanelHeight;
-        String path = "./src/main/java/org/example/image/other/";
+    public ImageBuilder getStatImage(){
+        ImageBuilder imageBuilder = new ImageBuilder(new Color(0, 0, 0));
         String[] stats = new String[]{"Shuffle", "Spells/Cast", "Cast delay", "Rechrg. Time", "Capacity", "Spread"};
-        String[] statImages = new String[]{"shuffle.png", "spell_cast.png", "cast_delay.png", "recharge_time.png", "slot.png", "spread.png"};
-        String[] statValues = new String[6];
-        BufferedImage currentImage;
-        BufferedImage wandSprite = rotateImageByDegrees(scaleImage(loadImage(this.getSprite()), 2*imageScaleFactor), -90);;
-        Font font = Global.getPixelFont().deriveFont(Font.PLAIN, baseIconSize*imageScaleFactor);
-        FontMetrics fm;
-        int textHeight;
-        //int textWidth;//
-        int maxWidth = 0;
-        int maxWidth2 = 0;
-        Graphics2D g2d;
-        JPanel result;
+        int[] statId = new int[]{0, 1, 2, 3, 6, 7};
+        String[] statValues = new String[stats.length];
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        int margin = 15;
+        int outsideMargin = 18;
+        int textScaling = 3;
+        int wandScaling = 6;
+        BufferedImage sprite = Global.rotateImageByDegrees(Global.scaleImage(Global.loadImage(this.getSprite()), wandScaling), -90);
 
-        if(this.shuffle) {
-            statValues[0] = "Yes";
-        }else{
-            statValues[0] = "No";
-        }
+        imageBuilder.setFont(Global.getPixelFont().deriveFont(Font.PLAIN, textScaling*7.5F));
+        imageBuilder.setMargin(3);
+        imageBuilder.setBorderThickness(3);
+        imageBuilder.setBorderColor(new Color(201, 137, 48));
+        dfs.setDecimalSeparator('.');
+        dfs.setGroupingSeparator(' ');
+        DecimalFormat df = new DecimalFormat("0.##", dfs);
+        df.setMinimumFractionDigits(1);
+        df.setMaximumFractionDigits(340);
+
+        statValues[0] = this.shuffle ? "Yes" : "No";
         statValues[1] = this.nbDraw.toString();
         statValues[2] = this.castDelay.toString("%1$3.2f", 1.0/60.0, false, "", " s");
         statValues[3] = this.rechargeTime.toString("%1$3.2f", 1.0/60.0, false, "", " s");
         statValues[4] = this.nbSlot.toString();
         statValues[5] = this.spread.toString("%1$3.2f", 1, false, "", " DEG");
 
-        Graphics2D gTemp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
-        fm = gTemp.getFontMetrics(font);
-        gTemp.dispose();
+        Point currentPoint = imageBuilder.drawTextFixedSpacing(stats, textScaling*Global.getBaseIconSize() + margin + outsideMargin, outsideMargin, 0, textScaling*(Global.getBaseIconSize() + 1), Color.WHITE);
+        currentPoint = imageBuilder.drawTextFixedSpacing(statValues, currentPoint.x + margin + outsideMargin, outsideMargin, 0, textScaling*(Global.getBaseIconSize() + 1), Color.WHITE);
+        currentPoint.x += (sprite == null ? 0 : 2*margin);
+        currentPoint.y += outsideMargin;
+        currentPoint.y = Math.max(currentPoint.y, sprite == null ? 0 : sprite.getHeight());
+        imageBuilder.setCanvasHeight(currentPoint.y);
 
         for(int i=0; i < stats.length; i++){
-            maxWidth = Math.max(maxWidth, fm.stringWidth(stats[i]));
-        }
-        for(int i=0; i < statValues.length; i++){
-            maxWidth2 = Math.max(maxWidth2, fm.stringWidth(statValues[i]));
+            imageBuilder.addImage(Wand.statImages[statId[i]], outsideMargin, outsideMargin + i*(textScaling*Global.getBaseIconSize() + textScaling), stats[i] + "_" + textScaling);
         }
 
-        JPanelWidth = baseIconSize*imageScaleFactor + maxWidth + maxWidth2 + wandSprite.getWidth() + 5*margin;
-        JPanelHeight = Math.max(stats.length*baseIconSize*imageScaleFactor + (stats.length + 1)*margin, wandSprite.getHeight() + 2*margin);
-        statJPanelImage = new BufferedImage(JPanelWidth, JPanelHeight, BufferedImage.TYPE_INT_ARGB);
-        g2d = statJPanelImage.createGraphics();
-
-        g2d.setColor(textColor);
-        g2d.setFont(font);
-        fm = g2d.getFontMetrics();
-
-        for(int i=0; i < Math.min(stats.length, statImages.length); i++){
-            textHeight = fm.getHeight();
-            //textWidth = fm.stringWidth(statValues[i]);//
-            currentImage = loadImage(path + statImages[i]);
-
-            if(currentImage != null){
-                g2d.drawImage(scaleImage(currentImage, imageScaleFactor), margin, i*baseIconSize*imageScaleFactor + (i + 1)*margin, null);
-            }
-            //g2d.setColor(this.textColor);//
-            g2d.drawString(stats[i], baseIconSize*imageScaleFactor + 2*margin, i*baseIconSize*imageScaleFactor + (i + 1)*margin + (textHeight + baseIconSize*imageScaleFactor)/2 - fm.getMaxDescent());
-            g2d.drawString(statValues[i], maxWidth + baseIconSize*imageScaleFactor + 3*margin, i*baseIconSize*imageScaleFactor + (i + 1)*margin + (textHeight + baseIconSize*imageScaleFactor)/2 - fm.getMaxDescent());
-
-            //g2d.setColor(Color.RED);
-            //g2d.drawRect(0, i*baseIconSize*imageScaleFactor + (i + 1)*this.margin + (textHeight + baseIconSize*imageScaleFactor)/2 - fm.getMaxDescent() - textHeight,  baseIconSize*imageScaleFactor + textWidth + maxWidth + 3*this.margin, textHeight + fm.getMaxDescent()*2);
-            //g2d.setColor(Color.GREEN);
-            //g2d.drawRect(0, i*baseIconSize*imageScaleFactor + (i + 1)*this.margin + (textHeight + baseIconSize*imageScaleFactor)/2 - fm.getMaxDescent(), baseIconSize*imageScaleFactor + textWidth + maxWidth + 3*this.margin, 0);
-            //g2d.setColor(Color.BLUE);
-            //g2d.drawRect(0, i*baseIconSize*imageScaleFactor + (i + 1)*this.margin + (textHeight + baseIconSize*imageScaleFactor)/2 - fm.getMaxDescent() - textHeight/2 + fm.getMaxDescent(), baseIconSize*imageScaleFactor + textWidth + maxWidth + 3*this.margin, 0);
+        if(sprite != null){
+            imageBuilder.addImage(sprite, currentPoint.x, (currentPoint.y - sprite.getHeight())/2, this.getFileName());
+            currentPoint.x += sprite.getWidth();
         }
+        imageBuilder.setCanvasWidth(imageBuilder.getCanvasWidth() + outsideMargin);
 
-        if(wandSprite != null){
-            g2d.drawImage(wandSprite,  baseIconSize*imageScaleFactor + maxWidth + maxWidth2 + 4*margin, Math.max((JPanelHeight - wandSprite.getHeight())/2, 0), null);
-            //g2d.setColor(Color.RED);//
-            //g2d.drawRect(baseIconSize*imageScaleFactor + maxWidth + maxWidth2 + 4*margin, Math.max((JPanelHeight - wandSprite.getHeight())/2, 0), wandSprite.getWidth(), wandSprite.getHeight());//
-        }
-
-        result = new JPanel(null){
-            @Override
-            protected void paintComponent(Graphics g){
-                super.paintComponent(g);
-                g.drawImage(statJPanelImage, 0, 0, this);
-            }
-        };
-
-        result.setBackground(backgroundColor);
-        result.setPreferredSize(new Dimension(JPanelWidth, JPanelHeight));
-        result.setBounds(0, 0, JPanelWidth, JPanelHeight);
-        return result;
+        return imageBuilder;
     }
 }
 
@@ -558,27 +507,24 @@ public class WandList{
         // empty
     }
 
-    public void generateAllSprites(){
+    public void generateAllSprites(boolean svg){
+        String path;
+
         if(wandList == null){
             System.out.println("error wand file not loaded at \"" + Global.getPathConfig() + "wands.txt" + "\", can't generate sprites");
             return;
         }
 
-        JPanel wandJPanel;
         String outputPath = Global.getPathOutput();
         for(WandStat wandStat : wandList){
-            //System.out.println(wandStat.toString());
-            wandJPanel = wandStat.getJPanel();
-            if(wandJPanel != null && wandJPanel.getSize().width > 0 && wandJPanel.getSize().height > 0){
-                BufferedImage bi = new BufferedImage(wandJPanel.getSize().width, wandJPanel.getSize().height, BufferedImage.TYPE_INT_ARGB);
-                Graphics g = bi.createGraphics();
-                wandJPanel.paint(g);
-                g.dispose();
-                try{
-                    ImageIO.write(bi, "png", new File(outputPath + "wandStat_" + wandStat.getFileName()));
-                }catch(Exception e){
-                    System.out.println("error while saving image \"" + outputPath + "wandStat_" + wandStat.getFileName() + "\"");
-                }
+            path = outputPath + "wandStat_" + wandStat.getFileName();
+            if(svg){
+                int dot = path.lastIndexOf('.');
+                path = dot >= 0 ? path.substring(0, dot) + ".svg" : path + ".svg";
+            }
+
+            if(!(svg ? wandStat.getStatImage().saveAsSVG(path, true) : Global.saveBufferedImage(wandStat.getStatImage().toPNG(), path))){
+                System.out.println("error while saving image \"" + outputPath + "wandStat_" + wandStat.getFileName() + "\"");
             }
         }
     }

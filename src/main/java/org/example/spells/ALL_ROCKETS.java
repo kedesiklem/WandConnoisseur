@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_ALL_ROCKETS;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class ALL_ROCKETS extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "all_rockets.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Spells to magic missiles";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "all_rockets.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Transforms every projectile currently in the air into a magic missile";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_ALL_ROCKETS();
         this.spawnProbabilities = new SpawnProbabilities(0, 0.1, 0, 0, 0, 0, 0.05, 0, 0, 0, 1);
         this.price = 400;

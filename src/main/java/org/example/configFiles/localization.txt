@@ -1,6 +1,10 @@
 COMMAND_GENERAL_SPELLS;spells;sorts
 COMMAND_GENERAL_SPELLS_DESCRIPTION;Spells separated by ",", prefix with 0: max: or inf: to override its charges (default: inf:).;Sorts séparés par des ",", préfixez par 0: max: ou inf: pour modifier les charges (défaut: inf:).
-COMMAND_GENERAL_DRAW;draw;draw
+COMMAND_GENERAL_ALWAYS_CAST;always_cast;lancer_assuré
+COMMAND_GENERAL_ALWAYS_CAST_DESCRIPTION;List of spells added at the start of every cast.;Liste des sorts ajoutés au début de chaque tir.
+COMMAND_GENERAL_SHUFFLE;shuffle;aléatoire
+COMMAND_GENERAL_SHUFFLE_DESCRIPTION;If true, the effective order of spells on the wand will be randomized (default: false).;Si vrai, l'ordre des sorts dans la baguette sera aléatoire (défaut: false).
+COMMAND_GENERAL_DRAW;draw;sort_lancer
 COMMAND_GENERAL_DRAW_DESCRIPTION;Number of spells/cast of the wand (default: 1).;Nombre de sorts/lancer de la baguette (défaut: 1).
 COMMAND_GENERAL_CAST_DELAY;cast_delay;delais_sort
 COMMAND_GENERAL_CAST_DELAY_DESCRIPTION;Cast delay in frames or seconds, add "f" or "s" at the end to specify (default: 0).;Délais des sorts en frames ou secondes, ajouter "f" ou "s" à la fin pour préciser (défaut: 0).
@@ -91,6 +95,7 @@ MESSAGE_LIST_COMMAND;List of available commands:;Liste des commandes disponibles
 MESSAGE_PING;Pong! Bot latency: %0 ms.;Pong! Latence du bot: %0 ms.
 ERROR_UNKNOWN_SPELL;Unknown spell "%0".;Sort "%0" inconnu.
 ERROR_UNKNOWN_SPELLS;Unknown spells: %0.;Sorts inconnus: %0.
+ERROR_NO_SPELL;No spells have been provided.;Aucun sort n'a été renseigné.
 ERROR_FILTER_EMPTY;No spell matches the condition `%0`.;Aucun sort ne respect la condition `%0`.
 MESSAGE_SPELLS_FILTERED;List of spells matching condition `%0`;Liste des sorts respectant la condition `%0`
 MESSAGE_ALL_SPELLS;List of all available spells;Liste de tout les sorts disponibles
@@ -116,7 +121,7 @@ ERROR_CONDITION_PARENTHESIS;Invalid parentheses in condition "%0".;Parenthèses 
 ERROR_CONDITION_SYNTAX;Syntax error in condition "%0".;"Erreur de syntaxe dans la condition "%0".
 ERROR_CONDITION;Error while evaluating: %0;Erreur lors de l'évaluation : %0
 ERROR_CONDITION_UNKNOWN_PROPERTY;"%0" -> property "%1" is unknown.;"%0" -> la propriété "%1" est inconnue.
-ERROR_UNKNOWN_PROPERTY;The property "%0" is unknown.;La propriété "%0" est inconnue.
+ERROR_UNKNOWN_PROPERTY;"%0" -> the property "%1" is unknown.;"%0" -> la propriété "%1" est inconnue.
 ERROR_SORT_SYNTAX;Syntax error in sort "%0".;Erreur de syntaxe dans le tri "%0".
 ERROR_CONDITION_INVALID_OPERATOR_BOOLEAN;"%0" -> "%1" isn't a valid comparator for a boolean.;"%0" -> "%1" n'est pas un comparateur valide pour un booléen.
 ERROR_CONDITION_INVALID_BOOLEAN;"%0" -> "%1" isn't a valid boolean, replace with "true" or "false".;"%0" -> "%1" n'est pas un booléen valide, remplacez par "true" ou "false".

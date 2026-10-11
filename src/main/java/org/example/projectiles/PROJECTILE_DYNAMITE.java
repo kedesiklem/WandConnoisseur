@@ -1,17 +1,21 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_DYNAMITE extends ProjectileBasePhysics{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "dynamite.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_DYNAMITE(){
         this.name = "Dynamite";
-        this.imageFile = "dynamite.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.projectileComponent = (this.projectileComponent == null ? new ProjectileComponent() : this.projectileComponent)
             .setSpeedMin(800)

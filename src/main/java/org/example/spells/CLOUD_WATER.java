@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_CLOUD_WATER;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class CLOUD_WATER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.static_projectile;
+    static final String staticImageFile = "cloud_water.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Rain cloud";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "cloud_water.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Creates a watery weather phenomenon";
-        this.type = SpellType.static_projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_CLOUD_WATER();
         this.spawnProbabilities = new SpawnProbabilities(0.2, 0.3, 0.4, 0.4, 0.3, 0.2, 0, 0, 0, 0, 0);
         this.price = 140;

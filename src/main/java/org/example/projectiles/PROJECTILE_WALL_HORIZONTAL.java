@@ -1,18 +1,22 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 import org.example.main.VelocityComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_WALL_HORIZONTAL extends ProjectileBase{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "wall_horizontal.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_WALL_HORIZONTAL(){
         this.name = "Horizontal barrier";
-        this.imageFile = "wall_horizontal.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.velocityComponent = (this.velocityComponent == null ? new VelocityComponent() : this.velocityComponent)
             .setGravityY(0.0)

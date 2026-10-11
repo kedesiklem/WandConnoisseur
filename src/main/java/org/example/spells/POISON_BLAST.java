@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_POISON_BLAST;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class POISON_BLAST extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.static_projectile;
+    static final String staticImageFile = "poison_blast.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Explosion of poison";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "poison_blast.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "An alchemical explosion";
-        this.type = SpellType.static_projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_POISON_BLAST();
         this.spawnProbabilities = new SpawnProbabilities(0, 0.5, 0.8, 0, 0.4, 0, 0.3, 0, 0, 0, 0);
         this.price = 140;

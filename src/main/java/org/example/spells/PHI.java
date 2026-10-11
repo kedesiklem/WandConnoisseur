@@ -3,19 +3,25 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 
 public class PHI extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "phi.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Phi";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "phi.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts a copy of every projectile-type spell in the current wand";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0.1, 0.2, 0, 0, 0, 1);
         this.recursive = true;
         this.price = 500;
@@ -26,24 +32,30 @@ public class PHI extends Spell{
     @Override
     public void action(CardPool cardPool, CastState castState, int recursionLevel, int iterationLevel){
         Spell currentSpell;
+        List<Spell> currentPool;
         int currentCastDelay = castState.getCastDelay();
         int currentRechargeTime = cardPool.getRechargeTime();
         int currentMana = cardPool.getManaUsage();
 
-        for(int i=0; i < cardPool.getDiscardSize(); i++){
-            currentSpell = cardPool.getDiscardSpell(i);
+        currentPool = cardPool.getDiscardList();
+        for(int i=0; i < currentPool.size(); i++){
+            currentSpell = currentPool.get(i);
             if(currentSpell.type == SpellType.projectile){
                 copyDrawDisabled(cardPool, castState, currentSpell, recursionLevel);
             }
         }
-        for(int i=0; i < cardPool.getHandSize(); i++){
-            currentSpell = cardPool.getHandSpell(i);
+
+        currentPool = cardPool.getHandList();
+        for(int i=0; i < currentPool.size(); i++){
+            currentSpell = currentPool.get(i);
             if(currentSpell.type == SpellType.projectile){
                 copyDrawDisabled(cardPool, castState, currentSpell, recursionLevel);
             }
         }
-        for(int i=0; i < cardPool.getDeckSize(); i++){
-            currentSpell = cardPool.getDeckSpell(i);
+
+        currentPool = cardPool.getDeckList();
+        for(int i=0; i < currentPool.size(); i++){
+            currentSpell = currentPool.get(i);
             if(currentSpell.type == SpellType.projectile){
                 copyDrawDisabled(cardPool, castState, currentSpell, recursionLevel);
             }

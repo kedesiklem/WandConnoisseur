@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.projectiles.Projectile;
 import org.example.projectiles.PROJECTILE_SLOW_BULLET;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class SLOW_BULLET_TRIGGER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "slow_bullet_trigger.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Energy Orb With A Trigger";
-        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "energy orb trigger"};
-        this.imageFile = "slow_bullet_trigger.png";
+        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "energy orb trigger", "orb trigger"};
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A slow but powerful orb of energy that casts another spell upon collision";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_SLOW_BULLET();
         this.triggerType = Projectile.TriggerType.trigger;
         this.spawnProbabilities = new SpawnProbabilities(0, 0.5, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0, 0);

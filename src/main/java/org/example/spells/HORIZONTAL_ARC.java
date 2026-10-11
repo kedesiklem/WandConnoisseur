@@ -6,19 +6,24 @@ import org.example.main.Global.DamageType;
 import org.example.script.Script;
 import org.example.script.SCRIPT_HORIZONTAL_ARC;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class HORIZONTAL_ARC extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "horizontal_arc.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Horizontal path";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "horizontal"};
-        this.imageFile = "horizontal_arc.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Forces a projectile on a horizontal path, but increases its damage";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_HORIZONTAL_ARC()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.4, 0, 0.4, 0, 0.4, 0, 0, 0, 0, 0);
         this.price = 20;

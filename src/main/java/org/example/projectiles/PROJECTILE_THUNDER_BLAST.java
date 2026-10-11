@@ -1,18 +1,22 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 import org.example.main.VelocityComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_THUNDER_BLAST extends ProjectileBase{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "thunder_blast.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_THUNDER_BLAST(){
         this.name = "Explosion of thunder";
-        this.imageFile = "thunder_blast.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.velocityComponent = (this.velocityComponent == null ? new VelocityComponent() : this.velocityComponent);
         this.projectileComponent = (this.projectileComponent == null ? new ProjectileComponent() : this.projectileComponent)

@@ -1,15 +1,19 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_ALL_DEATHCROSSES extends Projectile{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "all_deathcrosses.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_ALL_DEATHCROSSES(){
         this.name = "Spells to death crosses";
-        this.imageFile = "all_deathcrosses.png";
+        this.image = staticImage;
         this.emote = staticEmote;
     }
 }

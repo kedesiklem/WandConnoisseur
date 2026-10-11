@@ -1,17 +1,21 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_BOMB_HOLY_GIGA extends ProjectileBasePhysics{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "bomb_holy_giga.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_BOMB_HOLY_GIGA(){
         this.name = "Giga Holy Bomb";
-        this.imageFile = "bomb_holy_giga.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.projectileComponent = (this.projectileComponent == null ? new ProjectileComponent() : this.projectileComponent)
             .setLifetime(260);

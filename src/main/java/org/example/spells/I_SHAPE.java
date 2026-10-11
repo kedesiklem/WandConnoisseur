@@ -3,19 +3,24 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class I_SHAPE extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.multicast;
+    static final String staticImageFile = "i_shape.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Formation - Behind Your Back";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "behind your back", "behind back"};
-        this.imageFile = "i_shape.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts two spells: one ahead of and one behind the caster";
-        this.type = SpellType.multicast;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0.4, 0.5, 0.3, 0, 0, 0, 0, 0, 0, 0);
         this.price = 30;
         this.autoStat = false;

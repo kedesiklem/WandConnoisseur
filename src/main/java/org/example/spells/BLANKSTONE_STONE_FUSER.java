@@ -4,19 +4,25 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_BLANKSTONE_STONE_FUSER;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BLANKSTONE_STONE_FUSER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.static_projectile;
+    static final String staticImageFile = "stone_fuser.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
+        this.modded = true;
         this.name = "Stone Fuser";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "stone_fuser.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Brutally merge multiple stones in a large radius.";
-        this.type = SpellType.static_projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_BLANKSTONE_STONE_FUSER();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.1, 0.1, 0, 0, 0.3, 0.5, 0, 0, 0.05);
         this.price = 250;

@@ -3,19 +3,24 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class LIFETIME_DOWN extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "lifetime_down.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Reduce Lifetime";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "lifetime down"};
-        this.imageFile = "lifetime_down.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Reduces the lifetime of a spell";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0.5, 0.5, 0.75, 0.5, 0, 0, 0, 0.1);
         this.price = 90;
         this.manaCost = 10;

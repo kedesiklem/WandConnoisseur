@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_BOUNCE_EXPLOSION;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BOUNCE_EXPLOSION extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "bounce_explosion.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Explosive bounce";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "bounce_explosion.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile explode as it bounces";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_BOUNCE_EXPLOSION()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.2, 0.6, 0.8, 0.8, 0, 0, 0, 0, 0);
         this.price = 180;

@@ -7,10 +7,24 @@ import java.util.List;
 public class StringList{
     private final List<String> list = new ArrayList<>();
 
-    public StringList clone() {
+    public StringList clone(){
         StringList copy = new StringList();
         copy.list.addAll(this.list);
         return copy;
+    }
+
+    public boolean equals(StringList stringList){
+        if(this.list.size() != stringList.list.size()){
+            return false;
+        }
+
+        for(int i=0; i < this.list.size(); i++){
+            if(!this.list.get(i).equals(stringList.list.get(i))){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public boolean add(String value){

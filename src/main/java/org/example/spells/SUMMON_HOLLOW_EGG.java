@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.projectiles.Projectile;
 import org.example.projectiles.PROJECTILE_SUMMON_HOLLOW_EGG;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class SUMMON_HOLLOW_EGG extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.projectile;
+    static final String staticImageFile = "summon_hollow_egg.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Summon hollow egg";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "hollow egg", "egg trigger", "egg expiration"};
-        this.imageFile = "summon_hollow_egg.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Summons an otherwise empty egg that casts a spell upon cracking open";
-        this.type = SpellType.projectile;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_SUMMON_HOLLOW_EGG();
         this.triggerType = Projectile.TriggerType.expiration;
         this.spawnProbabilities = new SpawnProbabilities(0.6, 0.8, 0.7, 0, 0, 0.8, 0.3, 0, 0, 0, 0);

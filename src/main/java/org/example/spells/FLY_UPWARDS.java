@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_FLY_UPWARDS;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class FLY_UPWARDS extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "fly_upwards.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Fly upwards";
-        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "fly up"};
-        this.imageFile = "fly_upwards.png";
+        this.alias = new String[]{this.getClass().getSimpleName(), this.name, "fly upward", "fly up"};
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Causes a projectile to aim straight upwards a short time after casting";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_FLY_UPWARDS()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.3, 0, 0.45, 0, 0.3, 0, 0, 0, 0);
         this.price = 20;

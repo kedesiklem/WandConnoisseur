@@ -1,17 +1,21 @@
 package org.example.projectiles;
 
 import org.example.config.EmoteConfig;
+import org.example.main.Global;
 import org.example.main.Global.DamageType;
 import org.example.main.ProjectileComponent;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class PROJECTILE_MATERIAL_CEMENT extends ProjectileBase{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticImageFile = "material_cement.png";
+    static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
 
     public PROJECTILE_MATERIAL_CEMENT(){
         this.name = "Cement";
-        this.imageFile = "material_cement.png";
+        this.image = staticImage;
         this.emote = staticEmote;
         this.projectileComponent = (this.projectileComponent == null ? new ProjectileComponent() : this.projectileComponent)
             // projectile_type="MATERIAL_PARTICLE"

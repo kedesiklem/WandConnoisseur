@@ -17,11 +17,13 @@ public abstract class Projectile{
     protected int timer = 0;
     protected CastState triggerCastState = null;
     protected static final String imagePath = "./src/main/java/org/example/image/spell/";
-    protected String imageFile = "_unidentified.png";
+    protected static final String staticImageFile = "_unidentified.png";
+    protected static final BufferedImage staticImage = Global.loadImage(imagePath + staticImageFile);
+    protected BufferedImage image = staticImage;
+    protected boolean modded = false;
     protected String name = "projectile_name";
-    protected static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    protected static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
     protected String emote = staticEmote;
-    protected BufferedImage image = null;
     protected VelocityComponent velocityComponent = null;
     protected ProjectileComponent projectileComponent = null;
 
@@ -40,10 +42,9 @@ public abstract class Projectile{
         if(this.triggerCastState != null){
             newProjectile.triggerCastState = this.triggerCastState.clone(); // clone
         }
-        newProjectile.imageFile = this.imageFile;
+        newProjectile.image = this.image;
         newProjectile.name = this.name;
         newProjectile.emote = this.emote;
-        newProjectile.image = Global.cloneBufferedImage(this.image); // clone
         newProjectile.velocityComponent = this.velocityComponent == null ? null : this.velocityComponent.clone();
         newProjectile.projectileComponent = this.projectileComponent == null ? null : this.projectileComponent.clone();
 
@@ -51,6 +52,10 @@ public abstract class Projectile{
     }
 
     // getters
+    public boolean getIsModded(){
+        return this.modded;
+    }
+
     public TriggerType getTriggerType(){
         return this.triggerType;
     }
@@ -63,10 +68,6 @@ public abstract class Projectile{
         return this.triggerCastState;
     }
 
-    public String getImageFullPath(){
-        return imagePath + this.imageFile;
-    }
-
     public String getName(){
         return this.name;
     }
@@ -76,9 +77,6 @@ public abstract class Projectile{
     }
 
     public BufferedImage getImage(){
-        if(this.image == null){
-            this.image = Global.loadImage(imagePath + this.imageFile);
-        }
         return this.image;
     }
 

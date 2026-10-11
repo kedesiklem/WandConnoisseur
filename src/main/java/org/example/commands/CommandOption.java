@@ -6,7 +6,11 @@ import org.example.localization.LocalizedText;
 import java.util.Locale;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-public record CommandOption(OptionType optionType, LocalizedText name, LocalizedText description, boolean required, boolean autoComplete){
+public record CommandOption(OptionType optionType, LocalizedText name, LocalizedText description, boolean required, boolean autoComplete, String[] staticChoices){
+    public CommandOption(OptionType optionType, LocalizedText name, LocalizedText description, boolean required, boolean autoComplete){
+        this(optionType, name, description, required, autoComplete, null);
+    }
+
     public String toString(){
         return "[" + optionType.toString() + ", \"" + this.name + "\", \"" + this.description + "\", " + this.required + ", " + this.autoComplete + "]";
     }

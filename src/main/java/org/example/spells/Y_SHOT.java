@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.Projectile;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class Y_SHOT extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "y_shot.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Yplicate Spell";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "yplicate"};
-        this.imageFile = "y_shot.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts a copy of a projectile in a bifurcated pattern, but the copy still cost mana";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0.1, 0.2, 0.5, 0, 0, 0, 0, 0, 0, 0);
         this.price = 135;
         this.manaCost = 40;

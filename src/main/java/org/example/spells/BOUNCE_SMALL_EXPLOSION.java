@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_BOUNCE_SMALL_EXPLOSION;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BOUNCE_SMALL_EXPLOSION extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "bounce_small_explosion.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Sparkly bounce";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "bounce_small_explosion.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile release damaging sparks as it bounces";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_BOUNCE_SMALL_EXPLOSION()};
         this.spawnProbabilities = new SpawnProbabilities(0.5, 0.3, 0.3, 0, 0, 0, 0, 0, 0, 0, 0);
         this.price = 100;

@@ -1,5 +1,6 @@
 package org.example.listeners;
 
+import org.example.localization.LocalizedText;
 import org.example.main.Global;
 import org.example.menu.Menu;
 
@@ -13,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MenuListener extends ListenerAdapter{
+    private static final LocalizedText ERROR_MENU_OUTDATED = Global.getLanguageManager().get("ERROR_MENU_OUTDATED");
+    private static final LocalizedText ERROR_INTERACTION = Global.getLanguageManager().get("ERROR_INTERACTION");
     private static final Logger logger = LoggerFactory.getLogger(MenuListener.class);
 
     @Override
@@ -24,12 +27,12 @@ public class MenuListener extends ListenerAdapter{
         Menu menu = Global.menuManager.getById(Menu.getRootId(event.getValues().get(0)));
 
         if(menu == null){
-            event.reply("Erreur: ce menu est trop ancien pour être intéragi.").setEphemeral(true).queue();
+            event.reply(ERROR_MENU_OUTDATED.get(event)).setEphemeral(true).queue();
             return;
         }
 
         if(!menu.editEvent(event)){
-            event.reply("Erreur lors de l'interaction.").setEphemeral(true).queue();
+            event.reply(ERROR_INTERACTION.get(event)).setEphemeral(true).queue();
         }
     }
 
@@ -46,12 +49,12 @@ public class MenuListener extends ListenerAdapter{
         Menu menu = Global.menuManager.getById(Menu.getRootId(event.getComponentId()));
 
         if(menu == null){
-            event.reply("Erreur: ce menu est trop ancien pour être intéragi.").setEphemeral(true).queue();
+            event.reply(ERROR_MENU_OUTDATED.get(event)).setEphemeral(true).queue();
             return;
         }
 
         if(!menu.editEvent(event)){
-            event.reply("Erreur lors de l'interaction.").setEphemeral(true).queue();
+            event.reply(ERROR_INTERACTION.get(event)).setEphemeral(true).queue();
         }
     }
 
@@ -68,12 +71,12 @@ public class MenuListener extends ListenerAdapter{
         Menu menu = Global.menuManager.getById(Menu.getRootId(event.getModalId()));
 
         if(menu == null){
-            event.reply("Erreur: ce menu est trop ancien pour être intéragi.").setEphemeral(true).queue();
+            event.reply(ERROR_MENU_OUTDATED.get(event)).setEphemeral(true).queue();
             return;
         }
 
         if(!menu.editEvent(event)){
-            event.reply("Erreur lors de l'interaction.").setEphemeral(true).queue();
+            event.reply(ERROR_INTERACTION.get(event)).setEphemeral(true).queue();
         }
     }
 

@@ -2,18 +2,24 @@ package org.example.spells;
 
 import org.example.config.EmoteConfig;
 import org.example.main.*;
+
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class IF_END extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "if_end.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
     @Override
     protected void initialization(){
         this.name = "Requirement - Endpoint";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "req endpoint", "req end", "end point", "endpoint"};
-        this.imageFile = "if_end.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Any Requirement spells before this will skip all spells between them and this spell";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
         this.price = 10;
         this.manaCost = 0;

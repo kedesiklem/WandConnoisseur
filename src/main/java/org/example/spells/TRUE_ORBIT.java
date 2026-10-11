@@ -6,19 +6,24 @@ import org.example.main.Global.DamageType;
 import org.example.script.Script;
 import org.example.script.SCRIPT_TRUE_ORBIT;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class TRUE_ORBIT extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "true_orbit.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "True Orbit";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "true_orbit.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Makes a projectile rotate around the caster like an orbiting planet";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_TRUE_ORBIT()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.2, 0.3, 0.4, 0, 0, 0, 0, 0, 0);
         this.price = 40;

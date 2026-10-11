@@ -6,19 +6,24 @@ import org.example.main.Global.DamageType;
 import org.example.script.Script;
 import org.example.script.SCRIPT_ORBIT_SHOT;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class ORBIT_SHOT extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "orbit_shot.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Orbiting Arc";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "orbit"};
-        this.imageFile = "orbit_shot.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A projectile orbits the point of its origin";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_ORBIT_SHOT()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.2, 0.4, 0.4, 0.3, 0, 0, 0, 0, 0, 0);
         this.price = 30;

@@ -3,19 +3,25 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 
 public class IF_HP extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.other;
+    static final String staticImageFile = "if_hp.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Requirement - Low Health";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "if low hp", "if hp", "req hp", "hp req"};
-        this.imageFile = "if_hp.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "The next spell is skipped if you have more than 25% health left";
-        this.type = SpellType.other;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
         this.price = 100;
         this.manaCost = 0;
@@ -24,6 +30,7 @@ public class IF_HP extends Spell{
     @Override
     public void action(CardPool cardPool, CastState castState, int recursionLevel, int iterationLevel){
         Spell currentSpell;
+        List<Spell> currentDeck = cardPool.getDeckList();
         int endId = -1;
         int elseId = -1;
         int envelope_min = 0;
@@ -31,8 +38,8 @@ public class IF_HP extends Spell{
         HealthComponent healthComponent = Global.getPlayer().getHealthComponent();
         boolean skip = healthComponent.getHp()/healthComponent.getMaxHp() > 0.25;
 
-        for(int i=0; i < cardPool.getDeckSize(); i++){
-            currentSpell = cardPool.getDeckSpell(i);
+        for(int i=0; i < currentDeck.size(); i++){
+            currentSpell = currentDeck.get(i);
             if(currentSpell.getClass() == IF_ELSE.class){
                 endId = i;
                 elseId = i;

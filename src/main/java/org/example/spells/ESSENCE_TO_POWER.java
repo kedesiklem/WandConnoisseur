@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.script.Script;
 import org.example.script.SCRIPT_ESSENCE_TO_POWER;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class ESSENCE_TO_POWER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "essence_to_power.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Essence to Power";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "etp"};
-        this.imageFile = "essence_to_power.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Increases a projectile's damage based on the number of creatures nearby";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_ESSENCE_TO_POWER()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0.2, 0.5, 0.5, 0, 0, 0.5, 0, 0, 0, 0.1);
         this.price = 120;

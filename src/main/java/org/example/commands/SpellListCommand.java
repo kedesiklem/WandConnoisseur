@@ -39,7 +39,7 @@ public class SpellListCommand extends CommandLocal{
             new CommandOption(OptionType.STRING, COMMAND_SPELL_LIST_PROPERTY, COMMAND_SPELL_LIST_PROPERTY_DESCRIPTION, false, true),
             new CommandOption(OptionType.STRING, COMMAND_SPELL_LIST_CONDITION, COMMAND_SPELL_LIST_CONDITION_DESCRIPTION, false, true),
             new CommandOption(OptionType.STRING, COMMAND_SPELL_LIST_SORT, COMMAND_SPELL_LIST_SORT_DESCRIPTION, false, true),
-            new CommandOption(OptionType.STRING, COMMAND_SPELL_LIST_TYPE, COMMAND_SPELL_LIST_TYPE_DESCRIPTION, false, true)
+            new CommandOption(OptionType.STRING, COMMAND_SPELL_LIST_TYPE, COMMAND_SPELL_LIST_TYPE_DESCRIPTION, false, false, new String[]{"message", "csv"})
         };
     }
 

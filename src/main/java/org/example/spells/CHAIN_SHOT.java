@@ -6,19 +6,24 @@ import org.example.main.Global.DamageType;
 import org.example.script.Script;
 import org.example.script.SCRIPT_CHAIN_SHOT;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class CHAIN_SHOT extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "chain_shot.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Chain Spell";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "chain_shot.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Causes a projectile to cast a copy of itself upon expiring, up to 5 times";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_CHAIN_SHOT()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.4, 0, 0.6, 0.8, 0, 0, 0, 0, 0);
         this.price = 240;

@@ -7,19 +7,24 @@ import static org.example.main.Global.DamageTypeDoublePair.of;
 import org.example.script.Script;
 import org.example.script.SCRIPT_BLOOD_SPARKS;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class BLOOD_TO_POWER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "blood_punch.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Blood to Power";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "btp", "b2p"};
-        this.imageFile = "blood_punch.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "A projectile gains additional damage at the cost of 20% of your health";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedScripts = new Script[]{new SCRIPT_BLOOD_SPARKS()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.2, 0, 0, 0.8, 0.2, 0, 0, 0, 0.5);
         this.price = 150;

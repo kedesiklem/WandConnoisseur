@@ -14,17 +14,19 @@ public class CardPool{
     private List<Spell> hand;
     private List<Spell> discard;
     private boolean drawEnabled = true;
+    private boolean wrappedThisCast = false;
+    private boolean forceStopDraws = false;
+    private boolean playingPermanentCard = false;
     private boolean autoFlowchart = false;
     private boolean autoCardHistory = false;
     private Flowchart flowchart = new Flowchart();
     private CardHistory cardHistory;
     private List<Flowchart> callStack = new ArrayList<>();
-    private boolean wrappedThisCast = false;
     private int maxMana = 0;
     private int manaUsage = 0;
+    private boolean shuffle;
     private int rechargeTime = 0;
     private double recoil = 0.0;
-    private boolean forceStopDraws = false;
 
     public CardPool(){
         this.startingDeck = new ArrayList<>();
@@ -32,60 +34,109 @@ public class CardPool{
         this.hand = new ArrayList<>();
         this.discard = new ArrayList<>();
         this.cardHistory = new CardHistory(new Spell[0]);
+        this.shuffle = false;
     }
 
-    public CardPool(Spell[] spells){
+    public CardPool(Spell[] spells, boolean shuffle){
         this.startingDeck = new ArrayList<>();
         this.deck = new ArrayList<>();
         this.hand = new ArrayList<>();
         this.discard = new ArrayList<>();
-        for(int i=0; i < spells.length; i++){
-            if(spells[i] != null){
-                this.deck.add(spells[i]);
-                this.startingDeck.add(spells[i]);
+        for(Spell spell : spells){
+            if(spell != null){
+                this.deck.add(spell);
+                this.startingDeck.add(spell);
             }
         }
         this.cardHistory = new CardHistory(this.deck.toArray(new Spell[0]));
+        this.shuffle = shuffle;
     }
 
     // setters
+    public void setShuffle(boolean shuffle){
+        this.shuffle = shuffle;
+    }
+
+    public void setManaUsage(int manaUsage){
+        this.manaUsage = manaUsage;
+    }
+
     public void setAutoFlowchart(boolean autoFlowchart){
+        if(!autoFlowchart && this.autoFlowchart){
+            this.flowchart.reset();
+        }
         this.autoFlowchart = autoFlowchart;
     }
 
     public void setAutoCardHistory(boolean autoCardHistory){
+        if(!autoCardHistory && this.autoCardHistory){
+            this.cardHistory.reset();
+        }
         this.autoCardHistory = autoCardHistory;
     }
 
-    public void addCallStack(Flowchart node){
-        Flowchart[] callStackFlowchart;
-        Spell[] callStackSpell;
+    private void updateCardHistory(boolean callStack){
+        if(!this.autoCardHistory){
+            return;
+        }
 
-        this.callStack.add(node);
-        if(this.autoCardHistory){
-            callStackFlowchart = this.callStack.toArray(new Flowchart[0]);
-            callStackSpell = new Spell[callStackFlowchart.length];
-            for(int j=0; j < callStackSpell.length; j++){
-                callStackSpell[j] = callStackFlowchart[j].getSelf();
+        if(callStack){
+            Spell[] callStackSpell = new Spell[this.callStack.size()];
+            for(int i=0; i < callStackSpell.length; i++){
+                callStackSpell[i] = this.callStack.get(i).getSelf();
             }
             this.cardHistory.addCallStack(callStackSpell);
+        }else{
+            this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
         }
     }
 
+    public void addCallStack(Flowchart currentNode, Spell spell, boolean alwaysCast, boolean isCopy, boolean copyFailed){
+        if(!this.autoFlowchart && !this.autoCardHistory){
+            return;
+        }
+
+        Flowchart newNode = currentNode.add(spell);
+        if(alwaysCast){
+            newNode.setAlwaysCast(true);
+        }else if(isCopy){
+            newNode.setIsCopy(true);
+            if(copyFailed){
+                newNode.setCopyFailed(true);
+            }
+        }
+        if(!copyFailed){
+            this.callStack.add(newNode);
+            this.updateCardHistory(true);
+        }
+    }
+
+    public void addCallStackCopy(Spell spell, boolean copyFailed){
+        this.addCallStack(this.getCallStack(), spell, false, true, copyFailed);
+    }
+
+    public void addCallStackSpell(Flowchart node, Spell spell){
+        this.addCallStack(node, spell, false, false, false);
+    }
+
+    public void addCallStackAC(Flowchart node, Spell spell){
+        this.addCallStack(node, spell, true, false, false);
+    }
+
     public void removeCallStack(){
-        Flowchart[] callStackFlowchart;
-        Spell[] callStackSpell;
+        if(!this.autoFlowchart && !this.autoCardHistory){
+            return;
+        }
 
         if(this.callStack.size() > 0){
             this.callStack.remove(this.callStack.size() - 1);
-            if(this.autoCardHistory){
-                callStackFlowchart = this.callStack.toArray(new Flowchart[0]);
-                callStackSpell = new Spell[callStackFlowchart.length];
-                for(int j=0; j < callStackSpell.length; j++){
-                    callStackSpell[j] = callStackFlowchart[j].getSelf();
-                }
-                this.cardHistory.addCallStack(callStackSpell);
-            }
+            this.updateCardHistory(true);
+        }
+    }
+
+    private void addEmptyFlowchart(Flowchart node){
+        if(this.autoFlowchart){
+            node.add(null);
         }
     }
 
@@ -102,15 +153,13 @@ public class CardPool{
         return this.cardHistory;
     }
 
-    public void setStats(int maxMana, int rechargeTime){
-        this.maxMana = maxMana;
-        this.rechargeTime = rechargeTime;
-        this.manaUsage = 0;
-    }
-
-    public void setMana(int maxMana){
+    public void setStartingStats(int maxMana){
         this.maxMana = maxMana;
         this.manaUsage = 0;
+        this.recoil = 0;
+        if(this.shuffle && this.shuffleDeck()){
+            this.updateCardHistory(false);
+        }
     }
 
     public int getMaxMana(){
@@ -182,10 +231,6 @@ public class CardPool{
         return this.manaUsage;
     }
 
-    public void setManaUsage(int manaUsage){
-        this.manaUsage = manaUsage;
-    }
-
     public int getRechargeTime(){
         return this.rechargeTime;
     }
@@ -228,6 +273,18 @@ public class CardPool{
 
     public Spell[] getDeck(){
         return this.deck.toArray(new Spell[0]);
+    }
+
+    public List<Spell> getDiscardList(){
+        return this.discard;
+    }
+
+    public List<Spell> getHandList(){
+        return this.hand;
+    }
+
+    public List<Spell> getDeckList(){
+        return this.deck;
     }
 
     public int getDiscardSize(){
@@ -279,7 +336,7 @@ public class CardPool{
     }
 
     public void reset(){
-        this.deck = new ArrayList<Spell>(this.startingDeck);
+        this.deck = new ArrayList<>(this.startingDeck);
         this.hand.clear();
         this.discard.clear();
         this.drawEnabled = true;
@@ -311,26 +368,44 @@ public class CardPool{
         this.flowchart.reset();
     }
 
+    public Flowchart newFlowchart(){
+        Flowchart oldFlowchart = this.flowchart;
+        this.flowchart = new Flowchart();
+        return oldFlowchart;
+    }
+
     public void resetCardHistory(){
         this.cardHistory.reset(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
     }
 
-    private boolean sortDeck(){
+    private boolean shuffleDeck(){
         List<Spell> newDeck = new ArrayList<>();
-        ListIterator<Spell> sorter = this.startingDeck.listIterator();
-        Spell currentSpell;
-        boolean result;
+        long frame = Global.getCurrentFrame();
+        RandomGenerator random = Global.getRandomGenerator();
+        random.setSeed(frame, frame);
+        boolean result = false;
 
-        while(sorter.hasNext()){
-            currentSpell = sorter.next();
-            if(this.deck.contains(currentSpell)){
-                newDeck.add(currentSpell);
+        for(int i=this.deck.size(); i > 0; i--){
+            int rnd = random.random(1, i);
+            if(rnd != 1){
+                result = true;
             }
+            newDeck.add(this.deck.remove(rnd -1));
         }
 
-        result = !this.deck.equals(newDeck);
         this.deck = newDeck;
         return result;
+    }
+
+    private boolean sortDeck(){
+        if(this.shuffle){
+            return this.shuffleDeck();
+        }
+
+        List<Spell> original = new ArrayList<>(this.deck);
+        Sorter.sort(this.deck, this.startingDeck);
+
+        return !this.deck.equals(original);
     }
 
     public void endCast(){
@@ -340,7 +415,7 @@ public class CardPool{
 
         while(!this.hand.isEmpty()){
             currentSpell = this.hand.remove(0);
-            if(currentSpell.getType() == Spell.SpellType.modifier || currentSpell.getType() == Spell.SpellType.multicast){
+            if(!currentSpell.getAlwaysCast() && currentSpell.getType() == Spell.SpellType.modifier || currentSpell.getType() == Spell.SpellType.multicast){
                 conditionalChargeSpells.add(currentSpell);
             }else{
                 currentSpell.removeCharge();
@@ -348,22 +423,23 @@ public class CardPool{
             if(!containsProjectile && (currentSpell.getType() == Spell.SpellType.projectile || currentSpell.getType() == Spell.SpellType.static_projectile || currentSpell.getType() == Spell.SpellType.material)){
                 containsProjectile = true;
             }
-            this.discard.add(currentSpell);
-            if(this.autoCardHistory){
-                this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
+            if(!currentSpell.getAlwaysCast()){
+                this.discard.add(currentSpell);
             }
-        }
-        if(this.wrappedThisCast || this.deck.isEmpty()){
-            this.deck = new ArrayList<>(this.startingDeck);
-            this.discard.clear();
-            this.drawEnabled = true;
+            this.updateCardHistory(false);
         }
         if(containsProjectile){
             for(Spell spell : conditionalChargeSpells){
                 spell.removeCharge();
             }
         }
+        if(this.wrappedThisCast || this.deck.isEmpty()){
+            // recharge
+            this.discardToDeck();
+            this.sortDeck();
+        }
 
+        this.drawEnabled = true;
         this.forceStopDraws = false;
         this.wrappedThisCast = false;
     }
@@ -380,14 +456,22 @@ public class CardPool{
         this.discard.clear();
     }
 
-    public void draw(int nbDraw, boolean wrapAllowed, CastState castState){
-        draw(nbDraw, castState, wrapAllowed, this.getCallStack());
+    public void deckFullClear(){
+        this.deck = new ArrayList<>();
+    }
+
+    public void handFullClear(){
+        this.hand = new ArrayList<>();
+    }
+
+    public void discardFullClear(){
+        this.discard = new ArrayList<>();
     }
 
     public void refreshWrap(){
         this.discardToDeck();
-        if(this.sortDeck() && this.autoCardHistory){
-            this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
+        if(this.sortDeck()){
+            this.updateCardHistory(false);
         }
     }
 
@@ -397,16 +481,21 @@ public class CardPool{
         }
 
         this.discardToDeck();
-        if(this.sortDeck() && this.autoCardHistory){
-            this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
+        if(this.sortDeck()){
+            this.updateCardHistory(false);
         }
         this.wrappedThisCast = true;
     }
 
     public void draw(int nbDraw, CastState castState, boolean wrapAllowed, Flowchart currentNode){
-        Spell currentSpell = null;
-        boolean spellSkipped = false;
-        boolean drawConsumed = true;
+        Spell currentSpell;
+        boolean spellSkipped;
+        boolean drawConsumed;
+
+        if(this.playingPermanentCard && nbDraw == 1){
+            this.addEmptyFlowchart(currentNode);
+            return;
+        }
 
         for(int i=0; i < nbDraw; i++){
             if(this.drawEnabled && this.deck.isEmpty()){
@@ -417,7 +506,7 @@ public class CardPool{
             if(this.drawEnabled && !this.deck.isEmpty()){
                 drawConsumed = true;
                 currentSpell = this.deck.remove(0);
-                if(this.manaUsage + currentSpell.getManaCost() <= this.maxMana && (!currentSpell.getHasCharges() || currentSpell.getChargesLeft() > 0)){
+                if(this.manaUsage + currentSpell.getManaCost() <= this.maxMana && (currentSpell.getAlwaysCast() || !currentSpell.getHasCharges() || currentSpell.getChargesLeft() > 0)){
                     this.hand.add(currentSpell);
                     spellSkipped = false;
                 }else{
@@ -428,39 +517,52 @@ public class CardPool{
                         drawConsumed = false;
                         i--;
                     }
+                    this.updateCardHistory(false);
                 }
 
                 if(!spellSkipped){
-                    if(this.autoCardHistory){
-                        this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-                    }
-                    if(this.autoFlowchart || this.autoCardHistory){
-                        this.addCallStack(currentNode.add(currentSpell));
-                    }
+                    this.updateCardHistory(false);
+                    this.addCallStackSpell(currentNode, currentSpell);
                     this.manaUsage += currentSpell.getManaCost();
                     currentSpell.doAction(this, castState);
-                    if(this.autoFlowchart || this.autoCardHistory){
-                        this.removeCallStack();
-                    }
-                }else if(this.autoFlowchart && drawConsumed && i + 1 == nbDraw){
-                    currentNode.add(null);
+                    this.removeCallStack();
+                }else if(drawConsumed && i + 1 == nbDraw){
+                    this.addEmptyFlowchart(currentNode);
                 }
             }else{
-                if(this.autoFlowchart){
-                    currentNode.add(null);
-                }
+                this.addEmptyFlowchart(currentNode);
                 break;
             }
-            currentSpell = null;
         }
+    }
+
+    public void draw(int nbDraw, boolean wrapAllowed, CastState castState){
+        draw(nbDraw, castState, wrapAllowed, this.getCallStack());
+    }
+
+    public void alwaysCast(Spell spell, CastState castState, Flowchart currentNode){
+        this.playingPermanentCard = true;
+        Spell AC = spell.clone();
+        AC.setAlwaysCast(true);
+        if(AC.getManaCost() < 0){
+            this.manaUsage += AC.getManaCost();
+        }
+        this.hand.add(AC);
+        this.updateCardHistory(false);
+        this.addCallStackAC(currentNode, spell);
+        AC.doAction(this, castState);
+        this.removeCallStack();
+        this.playingPermanentCard = false;
+    }
+
+    public void alwaysCast(Spell spell, CastState castState){
+        alwaysCast(spell, castState, this.getCallStack());
     }
 
     public void discardNext(){
         if(!this.deck.isEmpty()){
             this.discard.add(this.deck.remove(0));
-            if(this.autoCardHistory){
-                this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-            }
+            this.updateCardHistory(false);
         }
     }
 
@@ -468,9 +570,7 @@ public class CardPool{
         for(int i=0; i < nbDiscard; i++){
             if(!this.deck.isEmpty()){
                 this.discard.add(this.deck.remove(0));
-                if(this.autoCardHistory){
-                    this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-                }
+                this.updateCardHistory(false);
             }else{
                 return;
             }
@@ -482,9 +582,7 @@ public class CardPool{
             return;
         }
         this.discard.add(this.deck.remove(id));
-        if(this.autoCardHistory){
-            this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-        }
+        this.updateCardHistory(false);
     }
 
     public void discardId(int fromId, int toId){
@@ -492,9 +590,7 @@ public class CardPool{
         for(int i=fromId; i <= toId; i++){
             if(id >= 0 && id < this.deck.size()){
                 this.discard.add(this.deck.remove(id));
-                if(this.autoCardHistory){
-                    this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-                }
+                this.updateCardHistory(false);
             }else{
                 id++;
             }
@@ -504,27 +600,35 @@ public class CardPool{
     public void discardAllDeck(){
         while(!this.deck.isEmpty()){
             this.discard.add(this.deck.remove(0));
-            if(this.autoCardHistory){
-                this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-            }
+            this.updateCardHistory(false);
         }
     }
 
     public void discardAllHand(){
         while(!this.hand.isEmpty()){
             this.discard.add(this.hand.remove(0));
-            if(this.autoCardHistory){
-                this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-            }
+            this.updateCardHistory(false);
         }
     }
 
     public void discardToDeck(){
         while(!this.discard.isEmpty()){
             this.deck.add(this.discard.remove(0));
-            if(this.autoCardHistory){
-                this.cardHistory.addStep(this.discard.toArray(new Spell[0]), this.hand.toArray(new Spell[0]), this.deck.toArray(new Spell[0]));
-            }
+            this.updateCardHistory(false);
+        }
+    }
+
+    public void copyHandToDiscard(){
+        for(Spell spell : this.hand){
+            this.discard.add(spell);
+            this.updateCardHistory(false);
+        }
+    }
+
+    public void copyDeckToDiscard(){
+        for(Spell spell : this.deck){
+            this.discard.add(spell);
+            this.updateCardHistory(false);
         }
     }
 
@@ -586,11 +690,15 @@ public class CardPool{
         return result.toString();
     }
 
-    public String CastInfoToString(){
+    public String CastInfoToString(boolean formatting){
         StringBuilder result = new StringBuilder();
 
-        result.append("Mana cost: ").append(this.manaUsage);
-        if(this.recoil != 0){result.append("\n").append("Recoil: ").append(this.recoil);}
+        if(formatting){
+            result.append("Mana cost: ").append(this.manaUsage);
+            if(this.recoil != 0){result.append("\n").append("Recoil: ").append(this.recoil);}
+        }else{
+            result.append(this.manaUsage).append(";").append(this.recoil);
+        }
 
         return result.toString();
     }

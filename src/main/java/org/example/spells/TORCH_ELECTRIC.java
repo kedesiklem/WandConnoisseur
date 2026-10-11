@@ -3,19 +3,24 @@ package org.example.spells;
 import org.example.config.EmoteConfig;
 import org.example.main.*;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class TORCH_ELECTRIC extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.passif;
+    static final String staticImageFile = "torch_electric.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Electric Torch";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "elec torch", "torch elec"};
-        this.imageFile = "torch_electric.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Gives your wand a bright but very dangerous light!";
-        this.type = SpellType.passif;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0.8, 0.6, 0.4, 0, 0, 0, 0, 0, 0, 0, 0);
         this.price = 150;
         this.manaCost = 0;

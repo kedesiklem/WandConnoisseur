@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.lang.StringBuilder;
 
+// TODO maybe one day optimize using recursive patterns
 class StructHistory{
     private int[][] history;
     private ArrayList<int[]> callStackHistory;

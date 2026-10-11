@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.main.Global.DamageType;
 import org.example.main.Global.DamageTypeDoublePair;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class DAMAGE_FOREVER extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.modifier;
+    static final String staticImageFile = "damage_forever.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Mana To Damage";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "mana to power", "mtd", "m2d"};
-        this.imageFile = "damage_forever.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "If the wand has more than 50 mana, all mana over that is converted into additional damage";
-        this.type = SpellType.modifier;
+        this.type = staticType;
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.2, 0.3, 0.6, 0.5, 0.2, 0, 0, 0, 0.2);
         this.price = 240;
         this.manaCost = 0;

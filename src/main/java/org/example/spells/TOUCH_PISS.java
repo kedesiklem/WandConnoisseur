@@ -4,19 +4,24 @@ import org.example.config.EmoteConfig;
 import org.example.main.*;
 import org.example.projectiles.PROJECTILE_TOUCH_PISS;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class TOUCH_PISS extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.material;
+    static final String staticImageFile = "touch_piss.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Touch of Gold?";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "touch of piss"};
-        this.imageFile = "touch_piss.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Transmutes everything in a short radius into urine, including walls, creatures... and you";
-        this.type = SpellType.material;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_TOUCH_PISS();
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0, 0, 0, 0.035, 0.035, 0.035, 0, 0, 0.1);
         this.price = 360;

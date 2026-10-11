@@ -58,7 +58,7 @@ public class RandomGenerator{
         return (rand() >>> 11)*(1.0/(1L << 53));
     }
 
-    public int random(int min, int max){
+    public int random(int min, int max){ // max inclusive
         if(min > max){
             int tmp = min;
             min = max;

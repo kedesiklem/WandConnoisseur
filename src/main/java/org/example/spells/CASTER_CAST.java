@@ -6,19 +6,24 @@ import org.example.projectiles.PROJECTILE_CASTER_CAST;
 import org.example.script.Script;
 import org.example.script.SCRIPT_CASTER_CAST;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class CASTER_CAST extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "caster_cast.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Inner spell";
         //this.alias = new String[]{this.getClass().getSimpleName(), this.name};
-        this.imageFile = "caster_cast.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Causes a projectile to be cast from where the caster is standing";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_CASTER_CAST();
         this.relatedScripts = new Script[]{new SCRIPT_CASTER_CAST()};
         this.spawnProbabilities = new SpawnProbabilities(0, 0, 0.2, 0, 0.2, 0.4, 0.4, 0, 0, 0, 0.2);

@@ -28,16 +28,17 @@ public class TextCommand extends CommandLocal{
     private static final LocalizedText ERROR_GENERATING_IMAGE = Global.getLanguageManager().get("ERROR_GENERATING_IMAGE");
     private static final LocalizedText ERROR_GRADIENT_IMPLEMENTATION = Global.getLanguageManager().get("ERROR_GRADIENT_IMPLEMENTATION");
     private static final LocalizedText ERROR_INVALID_TYPE = Global.getLanguageManager().get("ERROR_INVALID_TYPE");
+    private static final Pattern colorPattern = Pattern.compile("^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$");
 
     public TextCommand(){
         this.name = COMMAND_TEXT;
         this.description = COMMAND_TEXT_DESCRIPTION;
         this.commandOptions = new CommandOption[]{
             new CommandOption(OptionType.STRING, COMMAND_TEXT_TEXT, COMMAND_TEXT_TEXT_DESCRIPTION, true, false),
-            new CommandOption(OptionType.STRING, COMMAND_TEXT_FONT, COMMAND_TEXT_FONT_DESCRIPTION, false, true),
+            new CommandOption(OptionType.STRING, COMMAND_TEXT_FONT, COMMAND_TEXT_FONT_DESCRIPTION, false, false, new String[]{"pixel", "title", "glyph"}),
             new CommandOption(OptionType.NUMBER, COMMAND_TEXT_SIZE, COMMAND_TEXT_SIZE_DESCRIPTION, false, false),
             new CommandOption(OptionType.STRING, COMMAND_TEXT_COLOR, COMMAND_TEXT_COLOR_DESCRIPTION, false, true),
-            new CommandOption(OptionType.STRING, COMMAND_TEXT_TYPE, COMMAND_TEXT_TYPE_DESCRIPTION, false, true)
+            new CommandOption(OptionType.STRING, COMMAND_TEXT_TYPE, COMMAND_TEXT_TYPE_DESCRIPTION, false, false, new String[]{"png", "svg"})
         };
     }
 
@@ -100,8 +101,7 @@ public class TextCommand extends CommandLocal{
                     return;
                 }
             }else{
-                Pattern p = Pattern.compile("^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$");
-                Matcher m = p.matcher(colorOption.getAsString().toLowerCase());
+                Matcher m = colorPattern.matcher(colorOption.getAsString().toLowerCase());
                 if(m.find()){
                     if(m.group(4) != null){ // RGBA
                         color = new Color(Integer.parseInt(m.group(1), 16), Integer.parseInt(m.group(2), 16), Integer.parseInt(m.group(3), 16), Integer.parseInt(m.group(4), 16));

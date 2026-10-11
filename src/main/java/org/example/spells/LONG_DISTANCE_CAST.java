@@ -5,19 +5,24 @@ import org.example.main.*;
 import org.example.projectiles.Projectile;
 import org.example.projectiles.PROJECTILE_LONG_DISTANCE_CAST;
 
+import java.awt.image.BufferedImage;
 import java.lang.invoke.MethodHandles;
 
 public class LONG_DISTANCE_CAST extends Spell{
-    static String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final String staticEmote = EmoteConfig.getEmote(MethodHandles.lookup().lookupClass().getSimpleName().toLowerCase());
+    static final SpellType staticType = SpellType.utility;
+    static final String staticImageFile = "long_distance_cast.png";
+    static final BufferedImage staticImage = loadImage(staticType, staticImageFile);
 
     @Override
     protected void initialization(){
         this.name = "Long-distance cast";
         this.alias = new String[]{this.getClass().getSimpleName(), this.name, "ldc"};
-        this.imageFile = "long_distance_cast.png";
+        this.imageFile = staticImageFile;
+        this.image = staticImage;
         this.emote = staticEmote;
         this.description = "Casts a spell some distance away from the caster";
-        this.type = SpellType.utility;
+        this.type = staticType;
         this.relatedProjectile = new PROJECTILE_LONG_DISTANCE_CAST();
         this.triggerType = Projectile.TriggerType.expiration;
         this.spawnProbabilities = new SpawnProbabilities(0.6, 0.7, 0.8, 0, 0.6, 0.3, 0.4, 0, 0, 0, 0);

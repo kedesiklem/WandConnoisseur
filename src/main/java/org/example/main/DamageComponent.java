@@ -28,6 +28,16 @@ public class DamageComponent{
         return damageComponent;
     }
 
+    public boolean equals(DamageComponent damageComponent){
+        for(int i=0; i < this.damage.length; i++){
+            if(this.damage[i] != damageComponent.damage[i]){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public double[] getArray(boolean clone){
         return clone ? Arrays.copyOf(this.damage, this.damage.length) : this.damage;
     }
