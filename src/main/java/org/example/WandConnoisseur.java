@@ -113,6 +113,8 @@ public class WandConnoisseur{
 
         if(localMod){
             MainWindow.getInstance().run();
+            // like the old Swing EXIT_ON_CLOSE: closing the window ends the app, even if bot-side executors (MenuManager) were started
+            System.exit(0);
         }else{
             String botToken = BotConfig.getBotToken();
             if(botToken == null || botToken.isEmpty()){

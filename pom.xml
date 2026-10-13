@@ -11,7 +11,22 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <imgui.version>1.88.0</imgui.version>
+    <lwjgl.version>3.3.4</lwjgl.version>
+    <lwjgl.natives>natives-linux</lwjgl.natives>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.lwjgl</groupId>
+        <artifactId>lwjgl-bom</artifactId>
+        <version>${lwjgl.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -64,6 +79,58 @@
       <artifactId>batik-codec</artifactId>
       <version>1.19</version>
       <scope>compile</scope>
+    </dependency>
+
+    <!-- Dear ImGui (SpaiR JNI binding) for the local GUI -->
+    <dependency>
+      <groupId>io.github.spair</groupId>
+      <artifactId>imgui-java-binding</artifactId>
+      <version>${imgui.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.spair</groupId>
+      <artifactId>imgui-java-lwjgl3</artifactId>
+      <version>${imgui.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.spair</groupId>
+      <artifactId>imgui-java-natives-linux</artifactId>
+      <version>${imgui.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- LWJGL3 (GLFW + OpenGL) backing the ImGui renderer. Explicit compile-scope deps
+         because imgui-java-lwjgl3 marks its own lwjgl deps as runtime-only, which would
+         hide GLFW/GL classes from our code at compile time. -->
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl</artifactId>
+      <classifier>${lwjgl.natives}</classifier>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-glfw</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-glfw</artifactId>
+      <classifier>${lwjgl.natives}</classifier>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-opengl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-opengl</artifactId>
+      <classifier>${lwjgl.natives}</classifier>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
   <build>

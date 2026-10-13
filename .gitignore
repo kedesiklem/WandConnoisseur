@@ -8,3 +8,6 @@ target/
 *.properties
 *.class
 /untitled.iml
+
+# Dear ImGui's own saved window/docking layout (local to each user, regenerated on first run)
+/imgui_layout.ini
